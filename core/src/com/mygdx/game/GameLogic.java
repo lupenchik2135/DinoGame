@@ -9,8 +9,10 @@ import com.mygdx.game.Screens.PlayScreen;
 
 public class GameLogic extends Game {
 	public SpriteBatch batch;
-	public static final int V_WIDTH = 1960;
-	public static final int V_HEIGHT = 1280;
+	public static final int V_WIDTH = 400;
+	public static final int V_HEIGHT = 208;
+	public static final float PPM = 100;
+
 	
 	@Override
 	public void create () {

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="240" height="13" tilewidth="16" tileheight="16" infinite="0" nextlayerid="5" nextobjectid="36">
+ <tileset firstgid="1" source="Swamp.tsx"/>
+ <tileset firstgid="241" source="Background.tsx"/>
+ <layer id="2" name="Backround" width="240" height="13">
+  <data encoding="base64" compression="zlib">
+   eJzt1WXMV1UAwOE/f7o7pRsRkBTp7kZEpFU6BJHu7lS6G6SlO+3uALuTLimfzb178QObrx/YC9ztPts5u/fc/e7Zzu7pUCh0hrOc4zwXuMglLvMXV7jKNa5zg1AMF2FiEovYxCEu8YhPAhKSiMQkISnJSE4KUpKK00FP0BP0/Oee1KQhLelITwbuIyOZyEwWspKN7OQgJ7nITR7yko/7yc8DFKAghXiQwhShKMUoTgkeomTQE/QEPVHqeZhSlKYMZSlHeSpQkUpUpgpVqUZ1alCTWtSmDnWpR30a0JBGNOYRmvAoTXmMZjxOc1oEPUFP0BOlnpa0ojVtaMsTPMlTtKM9HehIJzrTha50oztP04OePEMvnqU3fehLP/ozgIEMYjBDGMqwoCfoCXqi1DOcEYxkFKMZw1jGMZ4JTGQSk5nCVKYxnRk8x/PMZBazmcNc5jGfBSxkEYtZwlKWsZwVQU/QE/REqWclq1jNGtbyAutYzwY2sonNbOFFtrKN7exgJ7vYzR72so/9HOAghzjMEY5yjJd4mVd4NegJeoKeKPW8xuu8wZu8xdu8w7u8x/t8wId8xMd8wqd8xucc5wRf8CVf8TXf8C3f8T0/8CM/8TO/8Cu/8XvQE/QEPVHq+YM/OckpTnOGs5zjPBe4yCUu8xdXuMo1rnODUDgUikGYmMQiNnGISzzik4CEJCIxSUhKsvCd0VPYq4uEok9PdNufoOf29SQnBSlJRWrSkJZ0pCcD95GRTGQmC1nJRnZykJNc5CYPecnH/eTnAQpQkEI8SGGKUJRit7kn4hxGtaeqNdVCd//+BD3Rv6c4JXiIkjxMKUpThrKUozwVqEglKlOFqlSjOjWoSS1qU4e61KM+DWhIIxrzCE14lKY8dpt7Is5hdOmJbvsT9ET/nmY8TnNa0JJWtKYNbXmCJ3mKdrSnAx3pRGe60JVudOdpetCTZ+jFs/SmD33pR38GMJBBt6En4p/7f3oi1kb0RMzvpv0Jeu6snnDo3vF8OPKfO9t4DnM5YV76Fo4zxDNDb1o7wnjkTfMxxmMZx3gmMJFJTGYKU5nGdGbwXPifnpnMCv+7Zx7zWcBCFrGYJQwOR/YMY3g4smcUo8NBz73U0yV079jle3ezh73sYz+n3Ot7CydZ5pnlrGAlq1jNGtbyAutYzwY2sonNbOFFtrKN7exgZ/jWPQc4yCEOc4SjHGNpOOgJeiJ7/gZvHYcN
+  </data>
+ </layer>
+ <layer id="3" name="Graphics" width="240" height="13">
+  <data encoding="base64" compression="zlib">
+   eJzt1bERgDAMBEFl1GN6gP5LskpgUCBsdmc+/+wiAAAAAAAAAGBtI3d2nwBeuXJ39wngsUpz9Rp6VZqr13zN8aPBbibcKgRo
+  </data>
+ </layer>
+ <objectgroup draworder="index" id="4" name="Ground">
+  <object id="29" x="0" y="176" width="944" height="32"/>
+  <object id="30" x="960" y="160" width="32" height="32"/>
+  <object id="31" x="1008" y="128" width="32" height="32"/>
+  <object id="32" x="1040" y="176" width="128" height="32"/>
+  <object id="33" x="1200" y="160" width="32" height="32"/>
+  <object id="34" x="1232" y="112" width="32" height="32"/>
+  <object id="35" x="1264" y="160" width="32" height="32"/>
+ </objectgroup>
+</map>
