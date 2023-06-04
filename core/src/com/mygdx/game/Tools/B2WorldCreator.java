@@ -6,6 +6,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
+import com.mygdx.game.Sprites.StoneWall;
 
 public class B2WorldCreator {
     public B2WorldCreator(World world, TiledMap tiledMap){
@@ -27,6 +28,9 @@ public class B2WorldCreator {
             fdef.shape = shape;
             body.createFixture(fdef);
         }
-
+        for (MapObject object : tiledMap.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect = ((RectangleMapObject) object).getRectangle();
+            new StoneWall(world, tiledMap, rect);
+        }
     }
 }

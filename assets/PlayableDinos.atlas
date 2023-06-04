@@ -1,0 +1,27 @@
+
+PlayableDinos.png
+size: 1024, 1024
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+Archeopterix
+  rotate: false
+  xy: 0, 2
+  size: 236, 558
+  orig: 236, 558
+  offset: 0, 0
+  index: -1
+Ichtio
+  rotate: false
+  xy: 260, 2
+  size: 234, 749
+  orig: 234, 749
+  offset: 0, 0
+  index: -1
+Triceratops
+  rotate: false
+  xy: 520, 2
+  size: 258, 721
+  orig: 258, 721
+  offset: 0, 0
+  index: -1

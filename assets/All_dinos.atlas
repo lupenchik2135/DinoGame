@@ -1,0 +1,41 @@
+
+All_dinos.png
+size: 1024, 2048
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+Archeo
+  rotate: false
+  xy: 2, 2
+  size: 227, 252
+  orig: 227, 252
+  offset: 0, 0
+  index: -1
+Game Boy GBC - DinosaurUs UK - Compso-PhotoRoom.png-PhotoRoom
+  rotate: false
+  xy: 734, 747
+  size: 236, 731
+  orig: 236, 731
+  offset: 0, 0
+  index: -1
+Game Boy GBC - DinosaurUs UK - Plesio-PhotoRoom.png-PhotoRoom
+  rotate: false
+  xy: 498, 539
+  size: 234, 939
+  orig: 234, 939
+  offset: 0, 0
+  index: -1
+Game Boy GBC - DinosaurUs UK - Trice-PhotoRoom.png-PhotoRoom
+  rotate: false
+  xy: 238, 558
+  size: 258, 920
+  orig: 258, 920
+  offset: 0, 0
+  index: -1
+Game Boy GBC - DinosaurUs UK - Veloci-PhotoRoom.png-PhotoRoom
+  rotate: false
+  xy: 2, 256
+  size: 234, 1222
+  orig: 234, 1222
+  offset: 0, 0
+  index: -1
