@@ -2,6 +2,8 @@ package com.mygdx.game.Tools;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.game.GameLogic;
+import com.mygdx.game.Sprites.Enemies.Enemy;
 import com.mygdx.game.Sprites.InteractiveTileObject;
 
 public class WorldContactListener implements ContactListener {
@@ -9,12 +11,22 @@ public class WorldContactListener implements ContactListener {
     public void beginContact(Contact contact) {
         Fixture fixA = contact.getFixtureA();
         Fixture fixB = contact.getFixtureB();
-        if (fixA.getUserData() == "head" || fixB.getUserData() == "head"){
-            Fixture head = fixA.getUserData() == "head" ? fixA : fixB;
-            Fixture object = head == fixA ? fixB : fixA;
-            if(object.getUserData() != null && InteractiveTileObject.class.isAssignableFrom(object.getUserData().getClass())){
-                ((InteractiveTileObject) object.getUserData()).onHeadHit();
+
+        int cDef = fixA.getFilterData().categoryBits | fixB.getFilterData().categoryBits;
+            if (fixA.getUserData() == "head" || fixB.getUserData() == "head"){
+                Fixture head = fixA.getUserData() == "head" ? fixA : fixB;
+                Fixture object = head == fixA ? fixB : fixA;
+                if(object.getUserData() != null && InteractiveTileObject.class.isAssignableFrom(object.getUserData().getClass())){
+                    ((InteractiveTileObject) object.getUserData()).onHeadHit();
+                }
             }
+        switch (cDef){
+            case GameLogic.ENEMY_HAND_BIT | GameLogic.PLAYER_BIT:
+                if(fixA.getFilterData().categoryBits == GameLogic.ENEMY_HAND_BIT)
+                    ((Enemy)fixA.getUserData()).hitOnHead();
+                else if(fixB.getFilterData().categoryBits == GameLogic.ENEMY_HAND_BIT)
+                    ((Enemy)fixB.getUserData()).hitOnHead();
+
         }
     }
 

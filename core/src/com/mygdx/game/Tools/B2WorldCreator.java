@@ -6,10 +6,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
+import com.mygdx.game.Screens.PlayScreen;
 import com.mygdx.game.Sprites.StoneWall;
 
 public class B2WorldCreator {
-    public B2WorldCreator(World world, TiledMap tiledMap){
+    public B2WorldCreator(PlayScreen screen){
+        World world = screen.getWorld();
+        TiledMap tiledMap = screen.getMap();
         BodyDef bdef = new BodyDef();
         PolygonShape shape = new PolygonShape();
         FixtureDef fdef = new FixtureDef();
@@ -26,11 +29,12 @@ public class B2WorldCreator {
             shape.setAsBox((rect.getWidth() / 2) / GameLogic.PPM, (rect.getHeight() / 2) / GameLogic.PPM);
 
             fdef.shape = shape;
+
             body.createFixture(fdef);
         }
         for (MapObject object : tiledMap.getLayers().get(3).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = ((RectangleMapObject) object).getRectangle();
-            new StoneWall(world, tiledMap, rect);
+            new StoneWall(screen, rect);
         }
     }
 }

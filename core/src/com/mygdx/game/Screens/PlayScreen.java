@@ -3,6 +3,8 @@ package com.mygdx.game.Screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -15,7 +17,9 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.Scenes.Hud;
-import com.mygdx.game.Sprites.Triceratops;
+import com.mygdx.game.Sprites.Enemies.MillyWarrior;
+import com.mygdx.game.Sprites.Playable.Forms.Ichtiozaur;
+import com.mygdx.game.Sprites.Playable.Forms.Triceratops;
 import com.mygdx.game.Tools.B2WorldCreator;
 import com.mygdx.game.Tools.WorldContactListener;
 
@@ -26,6 +30,8 @@ public class PlayScreen implements Screen {
     private OrthographicCamera gameCam;
     private Viewport gamePort;
     private Hud hud;
+    private AssetManager manager;
+    private Music music;
 
     private TmxMapLoader mapLoader;
     private TiledMap map;
@@ -33,6 +39,7 @@ public class PlayScreen implements Screen {
 
     private World world;
     private Box2DDebugRenderer b2dr;
+    private MillyWarrior millyWarrior;
     private Triceratops player;
     public PlayScreen(GameLogic game){
         atlas = new TextureAtlas("PlayableDinos.atlas");
@@ -46,10 +53,17 @@ public class PlayScreen implements Screen {
         gameCam.position.set(gamePort.getWorldWidth()/2, gamePort.getWorldHeight()/2, 0);
         world = new World(new Vector2(0, -10), true);
         b2dr = new Box2DDebugRenderer();
-        new B2WorldCreator(world, map);
-        player = new Triceratops(world, this);
-
+        new B2WorldCreator(this);
+        player = new Triceratops(this);
+        manager = new AssetManager();
+        manager.load("audio/Music/KimMusic.mp3", Music.class);
+        manager.finishLoading();
+        music = manager.get("audio/Music/KimMusic.mp3", Music.class);
+        music.setLooping(true);
+        music.setVolume(1f);
+        music.play();
         world.setContactListener(new WorldContactListener());
+        millyWarrior = new MillyWarrior(this, 128 / GameLogic.PPM, 32 / GameLogic.PPM);
     }
 
     public TextureAtlas getAtlas(){
@@ -66,13 +80,19 @@ public class PlayScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -2){
             player.b2Body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2Body.getWorldCenter(), true);
         }
+//        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)){
+//            player.expose();
+//            player.defineTriceratops();
+//        }
     }
     public void update(float deltaTime){
         handleInput(deltaTime);
         world.step(1/60f, 6, 2);
         player.update(deltaTime);
+        millyWarrior.update(deltaTime);
         gameCam.position.x = player.b2Body.getPosition().x;
         gameCam.update();
+        hud.update(deltaTime);
         renderer.setView(gameCam);
     }
     @Override
@@ -92,12 +112,21 @@ public class PlayScreen implements Screen {
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
         player.draw(game.batch);
+        millyWarrior.draw(game.batch);
         game.batch.end();
     }
 
     @Override
     public void resize(int width, int height) {
         gamePort.update(width, height);
+    }
+
+    public TiledMap getMap() {
+        return map;
+    }
+
+    public World getWorld(){
+        return world;
     }
 
     @Override
@@ -122,5 +151,6 @@ public class PlayScreen implements Screen {
         world.dispose();
         b2dr.dispose();
         hud.dispose();
+        manager.dispose();
     }
 }

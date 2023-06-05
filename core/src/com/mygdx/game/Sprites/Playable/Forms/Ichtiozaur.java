@@ -1,5 +1,8 @@
-package com.mygdx.game.Sprites;
+package com.mygdx.game.Sprites.Playable.Forms;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -9,90 +12,103 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.Screens.PlayScreen;
 
-
-
-public class Triceratops extends Sprite {
-    public enum State{FALLING, JUMPING, RUNNING, CHANGING, STANDING, HITTING}
+public class Ichtiozaur extends Sprite {
+    public enum State{FALLING, RUNNING, CHANGING, STANDING, HITTING}
     public State currentState;
     public State previousState;
     public World world;
     public Body b2Body;
 
-    private TextureRegion triceratopsStand;
-    private Animation triceratopsRun;
-    private Animation triceratopsJump;
+    private TextureRegion ichtiozaurStand;
+    private Animation ichtiozaurRun;
+    private Animation ichtiozaurJump;
 
-    private Animation triceratopsHit;
+    private Animation ichtiozaurHit;
     private float stateTimer;
     private boolean runningRight;
+    private AssetManager manager;
+    private Sound walking;
+    private boolean setToExpose;
+    private boolean exposed;
 
-    public Triceratops(World world, PlayScreen screen){
-        super(screen.getAtlas().findRegion("Triceratops"));
-        this.world = world;
+    public Ichtiozaur(PlayScreen screen){
+        super(screen.getAtlas().findRegion("Ichtio"));
+        this.world = screen.getWorld();
         currentState = State.STANDING;
         previousState = State.STANDING;
         stateTimer = 0;
         runningRight = true;
 
         Array<TextureRegion> frames = new Array<TextureRegion>();
-        for(int i = 0; i < 7; i++){
-            if(i <= 3) frames.add(new TextureRegion(getTexture(),525 + i * 60, 50, 58, 48));
-            else frames.add(new TextureRegion(getTexture(), 525 + (i - 3) * 60, 100, 58, 48));
+        for(int i = 0; i < 5; i++){
+            if(i <= 2) frames.add(new TextureRegion(getTexture(),265 + i * 61, 157, 58, 30));
+            else if(i <= 4) frames.add(new TextureRegion(getTexture(), 265 + (i - 3) * 56, 192, 52, 30));
+            else frames.add(new TextureRegion(getTexture(),375, 192, 58, 30));
         }
-        triceratopsRun = new Animation(0.1f, frames);
+        ichtiozaurRun = new Animation(0.1f, frames);
         frames.clear();
 
-        for (int i = 0; i < 3; i ++){
-            frames.add(new TextureRegion(getTexture(), 522 + i * 60, 365, 52, 48));
-        }
-        triceratopsJump = new Animation(0.1f, frames);
-        frames.clear();
+
 
         for(int i = 0; i < 7; i++){
-            if(i <= 3) frames.add(new TextureRegion(getTexture(),525 + i * 60, 50, 58, 48));
-            else frames.add(new TextureRegion(getTexture(), 525 + (i - 3) * 60, 100, 58, 48));
+            if(i <= 3) frames.add(new TextureRegion(getTexture(),260 + i * 60, 50, 58, 30));
+            else frames.add(new TextureRegion(getTexture(), 260 + (i - 3) * 60, 100, 58, 30));
         }
-        triceratopsHit = new Animation(0.1f, frames);
+        ichtiozaurHit = new Animation(0.1f, frames);
         frames.clear();
 
-        triceratopsStand = new TextureRegion(getTexture(), 522, 307, 58, 46);
+        ichtiozaurStand = new TextureRegion(getTexture(), 267, 3, 56, 29);
 
         defineTriceratops();
         setBounds(0, 0, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
-        setRegion(triceratopsStand);
+        setRegion(ichtiozaurStand);
+
+        setToExpose = false;
+        exposed = false;
+
     }
 
     public void update(float deltaTime){
-        setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
-        setRegion(getFrame(deltaTime));
+        if(setToExpose && !exposed){
+            world.destroyBody(b2Body);
+            exposed = true;
+            setBounds(getX(), getY(), 16 / GameLogic.PPM, 8 / GameLogic.PPM);
+            walking.dispose();
+            manager.dispose();
+
+        }
+        else if (!exposed){
+            setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
+            if (currentState == State.RUNNING){
+                walking.resume();
+            }else walking.pause();
+            setRegion(getFrame(deltaTime));
+        }
     }
     public TextureRegion getFrame(float deltaTime){
         currentState = getState();
         TextureRegion region;
         switch (currentState){
-            case JUMPING:
-                region = (TextureRegion) triceratopsJump.getKeyFrame(stateTimer);
-                break;
             case RUNNING:
-                region = (TextureRegion) triceratopsRun.getKeyFrame(stateTimer, true);
+                region = (TextureRegion) ichtiozaurRun.getKeyFrame(stateTimer, true);
                 break;
             case HITTING:
-                region = (TextureRegion) triceratopsHit.getKeyFrame(stateTimer);
+                region = (TextureRegion) ichtiozaurHit.getKeyFrame(stateTimer);
                 break;
             case FALLING:
             case STANDING:
             default:
-                region = triceratopsStand;
+                region = ichtiozaurStand;
                 break;
         }
         if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
             region.flip(true, false);
-            setLeftTriceFixture(b2Body);
+//            setLeftTriceFixture(b2Body);
             runningRight = false;
         }
         else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
             region.flip(true, false);
-            setRightTriceFixture(b2Body);
+//            setRightTriceFixture(b2Body);
             runningRight = true;
         }
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
@@ -100,12 +116,13 @@ public class Triceratops extends Sprite {
         return region;
     }
     public State getState(){
-        if (b2Body.getLinearVelocity().y > 0 || (b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
-                return State.JUMPING;
-        else if (b2Body.getLinearVelocity().y < 0)
-                return State.FALLING;
+        if (b2Body.getLinearVelocity().y < 0)
+            return State.FALLING;
         else if (b2Body.getLinearVelocity().x != 0)
             return State.RUNNING;
+        else if (Gdx.input.isTouched()){
+            return State.HITTING;
+        }
         else
             return State.STANDING;
     }
@@ -125,22 +142,19 @@ public class Triceratops extends Sprite {
         vectors[10] = new Vector2(28 / GameLogic.PPM, -4 / GameLogic.PPM);
         shapeRight.createLoop(vectors);
 
-
         FixtureDef fdefRight = new FixtureDef();
         fdefRight.filter.categoryBits = GameLogic.PLAYER_BIT;
-        fdefRight.filter.maskBits = GameLogic.DEFAULT_BIT | GameLogic.STONE_WALL;
+        fdefRight.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
         fdefRight.shape = shapeRight;
         if(b2Body.getFixtureList().size > 2) {
             b2Body.destroyFixture(b2Body.getFixtureList().get(0));
             b2Body.destroyFixture(b2Body.getFixtureList().get(1));
         }
         b2Body.createFixture(fdefRight);
-
-        EdgeShape head = new EdgeShape();
-        head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefRight.shape = head;
-        fdefRight.isSensor = true;
-        b2Body.createFixture(fdefRight).setUserData("head");
 
 
     }
@@ -165,24 +179,40 @@ public class Triceratops extends Sprite {
         }
         FixtureDef fdefLeft = new FixtureDef();
         fdefLeft.filter.categoryBits = GameLogic.PLAYER_BIT;
-        fdefLeft.filter.maskBits = GameLogic.DEFAULT_BIT | GameLogic.STONE_WALL;
+        fdefLeft.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
         fdefLeft.shape = shapeLeft;
         b2Body.createFixture(fdefLeft);
 
-        EdgeShape head = new EdgeShape();
-        head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefLeft.shape = head;
-        fdefLeft.isSensor = true;
-        b2Body.createFixture(fdefLeft).setUserData("head");
     }
     public void defineTriceratops(){
         BodyDef bdef = new BodyDef();
-        bdef.position.set(64 / GameLogic.PPM,32 / GameLogic.PPM);
+        bdef.position.set(0 / GameLogic.PPM, 32 / GameLogic.PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
         b2Body = world.createBody(bdef);
-
-        setRightTriceFixture(b2Body);
-
-
+        manager = new AssetManager();
+        manager.load("audio/Sounds/triceStep.mp3", Sound.class);
+        manager.finishLoading();
+        walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
+        walking.play(0.5f, 10, 10);
+        walking.loop();
+//        setRightTriceFixture(b2Body);
+        CircleShape shape = new CircleShape();
+        shape.setRadius(7 / GameLogic.PPM);
+        FixtureDef fdef = new FixtureDef();
+        fdef.filter.categoryBits = GameLogic.PLAYER_BIT;
+        fdef.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
+        fdef.shape = shape;
+        b2Body.createFixture(fdef);
+    }
+    public void expose(){
+        setToExpose = true;
     }
 }
