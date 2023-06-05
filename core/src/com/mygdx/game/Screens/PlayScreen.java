@@ -20,6 +20,7 @@ import com.mygdx.game.Scenes.Hud;
 import com.mygdx.game.Sprites.Enemies.MillyWarrior;
 import com.mygdx.game.Sprites.Playable.Forms.Ichtiozaur;
 import com.mygdx.game.Sprites.Playable.Forms.Triceratops;
+import com.mygdx.game.Sprites.Playable.Player;
 import com.mygdx.game.Tools.B2WorldCreator;
 import com.mygdx.game.Tools.WorldContactListener;
 
@@ -40,7 +41,7 @@ public class PlayScreen implements Screen {
     private World world;
     private Box2DDebugRenderer b2dr;
     private MillyWarrior millyWarrior;
-    private Triceratops player;
+    private Player player;
     public PlayScreen(GameLogic game){
         atlas = new TextureAtlas("PlayableDinos.atlas");
         this.game = game;
@@ -54,7 +55,7 @@ public class PlayScreen implements Screen {
         world = new World(new Vector2(0, -10), true);
         b2dr = new Box2DDebugRenderer();
         new B2WorldCreator(this);
-        player = new Triceratops(this);
+        player = new Player(this);
         manager = new AssetManager();
         manager.load("audio/Music/KimMusic.mp3", Music.class);
         manager.finishLoading();
@@ -80,10 +81,15 @@ public class PlayScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -2){
             player.b2Body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2Body.getWorldCenter(), true);
         }
-//        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)){
-//            player.expose();
-//            player.defineTriceratops();
-//        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_1)){
+            player.currentForm = 0;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_2)){
+            player.currentForm = 1;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.NUM_3)){
+            player.currentForm = 2;
+        }
     }
     public void update(float deltaTime){
         handleInput(deltaTime);

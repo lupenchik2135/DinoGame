@@ -17,13 +17,12 @@ public class MillyWarrior extends Enemy{
     private float stateTime;
     private Animation standAnimation;
     private Animation walkAnimation;
-    private Array<TextureRegion> frames;
     private boolean runningRight;
     private boolean setToDestroy;
     private boolean destroyed;
     public MillyWarrior(PlayScreen screen, float x, float y) {
         super(screen, x, y);
-        frames = new Array<TextureRegion>();
+        Array<TextureRegion> frames = new Array<TextureRegion>();
         for (int i = 0; i <= 5; i ++){
             if (i <= 2) frames.add(new TextureRegion(screen.getAtlas().findRegion("Archeopterix"), 4 + (i * 64), 437, 60, 30));
             else frames.add(new TextureRegion(screen.getAtlas().findRegion("Archeopterix"), 4 + ((i - 3) * 64), 472, 60, 30));

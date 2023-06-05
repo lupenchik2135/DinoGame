@@ -15,32 +15,23 @@ import com.mygdx.game.Screens.PlayScreen;
 
 
 
-public class Triceratops extends Sprite {
-    public enum State{FALLING, JUMPING, RUNNING, CHANGING, STANDING, HITTING}
-    public State currentState;
-    public State previousState;
-    public World world;
-    public Body b2Body;
+public class Triceratops extends Form {
+
+
 
     private TextureRegion triceratopsStand;
     private Animation triceratopsRun;
     private Animation triceratopsJump;
 
     private Animation triceratopsHit;
-    private float stateTimer;
-    private boolean runningRight;
+
     private AssetManager manager;
     private Sound walking;
     private boolean setToExpose;
     private boolean exposed;
 
-    public Triceratops(PlayScreen screen){
-        super(screen.getAtlas().findRegion("Triceratops"));
-        this.world = screen.getWorld();
-        currentState = State.STANDING;
-        previousState = State.STANDING;
-        stateTimer = 0;
-        runningRight = true;
+    public Triceratops(PlayScreen screen, Body b2Body){
+        super(screen, "Triceratops", b2Body);
 
         Array<TextureRegion> frames = new Array<TextureRegion>();
         for(int i = 0; i < 7; i++){
@@ -62,22 +53,22 @@ public class Triceratops extends Sprite {
         }
         triceratopsHit = new Animation(0.1f, frames);
         frames.clear();
-
         triceratopsStand = new TextureRegion(getTexture(), 522, 307, 58, 46);
-
-        defineTriceratops();
-        setBounds(0, 0, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
-        setRegion(triceratopsStand);
         setToExpose = false;
-        exposed = false;
+        exposed = true;
     }
 
     public void update(float deltaTime){
-        setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
-        if (currentState == State.RUNNING){
-            walking.resume();
-        }else walking.pause();
-        setRegion(getFrame(deltaTime));
+        if(setToExpose && !exposed){
+
+        }
+        else if (!exposed) {
+            setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
+            if (currentState == State.RUNNING) {
+                walking.resume();
+            } else walking.pause();
+            setRegion(getFrame(deltaTime));
+        }
     }
     public TextureRegion getFrame(float deltaTime){
         currentState = getState();
@@ -100,12 +91,12 @@ public class Triceratops extends Sprite {
         }
         if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
             region.flip(true, false);
-            setLeftTriceFixture(b2Body);
+            setLeftTriceFixture();
             runningRight = false;
         }
         else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
             region.flip(true, false);
-            setRightTriceFixture(b2Body);
+            setRightTriceFixture();
             runningRight = true;
         }
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
@@ -125,7 +116,7 @@ public class Triceratops extends Sprite {
         else
             return State.STANDING;
     }
-    public void setRightTriceFixture(Body b2Body){
+    public void setRightTriceFixture(){
         ChainShape shapeRight = new ChainShape();
         Vector2[] vectors = new Vector2[11];
         vectors[0] = new Vector2(32 / GameLogic.PPM, 3 / GameLogic.PPM);
@@ -140,8 +131,6 @@ public class Triceratops extends Sprite {
         vectors[9] = new Vector2(17 / GameLogic.PPM, -12 / GameLogic.PPM);
         vectors[10] = new Vector2(28 / GameLogic.PPM, -4 / GameLogic.PPM);
         shapeRight.createLoop(vectors);
-
-
         FixtureDef fdefRight = new FixtureDef();
         fdefRight.filter.categoryBits = GameLogic.PLAYER_BIT;
         fdefRight.filter.maskBits = GameLogic.GROUND_BIT |
@@ -164,7 +153,7 @@ public class Triceratops extends Sprite {
 
 
     }
-    public void setLeftTriceFixture(Body b2Body){
+    public void setLeftTriceFixture(){
         ChainShape shapeLeft = new ChainShape();
         Vector2[] vectors = new Vector2[11];
         vectors[0] = new Vector2(-32 / GameLogic.PPM, 3 / GameLogic.PPM);
@@ -199,17 +188,23 @@ public class Triceratops extends Sprite {
         fdefLeft.isSensor = true;
         b2Body.createFixture(fdefLeft).setUserData("head");
     }
-    public void defineTriceratops(){
-        BodyDef bdef = new BodyDef();
-        bdef.position.set(0 / GameLogic.PPM, 32 / GameLogic.PPM);
-        bdef.type = BodyDef.BodyType.DynamicBody;
-        b2Body = world.createBody(bdef);
+    public void define(){
         manager = new AssetManager();
         manager.load("audio/Sounds/triceStep.mp3", Sound.class);
         manager.finishLoading();
         walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
         walking.play(0.5f, 10, 10);
         walking.loop();
-        setRightTriceFixture(b2Body);
+        setBounds(0, 0, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
+        setRegion(triceratopsStand);
+        setRightTriceFixture();
+        setToExpose = false;
+        exposed = false;
+    }
+    public void expose(){
+        setToExpose = true;
+        while (b2Body.getFixtureList().size != 0){
+            b2Body.destroyFixture(b2Body.getFixtureList().get(b2Body.getFixtureList().size-1));
+        }
     }
 }
