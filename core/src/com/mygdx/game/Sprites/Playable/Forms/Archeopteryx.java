@@ -5,10 +5,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.Screens.PlayScreen;
@@ -36,6 +33,11 @@ public class Archeopteryx extends Form{
         frames.clear();
 
 
+        frames.add(new TextureRegion(getTexture(), 5 , 289, 57, 30));
+        frames.add(new TextureRegion(getTexture(), 65, 297, 53, 24));
+
+        archeopteryxJump = new Animation(0.1f, frames);
+        frames.clear();
 
         for(int i = 0; i < 7; i++){
             if(i <= 3) frames.add(new TextureRegion(getTexture(),5 + i * 51, 191, 53, 25));
@@ -66,6 +68,9 @@ public class Archeopteryx extends Form{
         currentState = getState();
         TextureRegion region;
         switch (currentState){
+            case JUMPING:
+                region = (TextureRegion) archeopteryxJump.getKeyFrame(stateTimer);
+                break;
             case RUNNING:
                 region = (TextureRegion) archeopteryxRun.getKeyFrame(stateTimer, true);
                 break;
@@ -90,8 +95,49 @@ public class Archeopteryx extends Form{
         previousState = currentState;
         return region;
     }
+    public void setRightFixture(){
+        if (b2Body.getFixtureList().size >= 2){
+            while (b2Body.getFixtureList().size > 1) {
+                b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+            }
+        }
+        FixtureDef fdefRight = new FixtureDef();
+        fdefRight.filter.categoryBits = GameLogic.PLAYER_BIT;
+        fdefRight.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
+
+        EdgeShape head = new EdgeShape();
+        head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
+        fdefRight.shape = head;
+        fdefRight.isSensor = true;
+        b2Body.createFixture(fdefRight).setUserData("mouth");
+    }
+    public void setLeftFixture(){
+        if (b2Body.getFixtureList().size >= 2){
+            while (b2Body.getFixtureList().size > 1) {
+                b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+            }
+        }
+        FixtureDef fdefLeft = new FixtureDef();
+        fdefLeft.filter.categoryBits = GameLogic.PLAYER_BIT;
+        fdefLeft.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
+        EdgeShape head = new EdgeShape();
+        head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
+        fdefLeft.shape = head;
+        fdefLeft.isSensor = true;
+        b2Body.createFixture(fdefLeft).setUserData("mouth");
+    }
     public Form.State getState(){
-        if (b2Body.getLinearVelocity().y < 0)
+        if (b2Body.getLinearVelocity().y > 0 || (b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
+            return State.JUMPING;
+        else if (b2Body.getLinearVelocity().y < 0)
             return Form.State.FALLING;
         else if (b2Body.getLinearVelocity().x != 0)
             return Form.State.RUNNING;
@@ -198,7 +244,7 @@ public class Archeopteryx extends Form{
         walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
         walking.play(0.5f, 10, 10);
         walking.loop();
-        setBounds(0, 0, 16 / GameLogic.PPM, 16 / GameLogic.PPM);
+        setBounds(0, 0, 18 / GameLogic.PPM, 16 / GameLogic.PPM);
         setRegion(archeopteryxStand);
         setRightTriceFixture();
         setToExpose = false;
@@ -209,5 +255,7 @@ public class Archeopteryx extends Form{
         while (b2Body.getFixtureList().size != 0){
             b2Body.destroyFixture(b2Body.getFixtureList().get(b2Body.getFixtureList().size-1));
         }
+        walking.pause();
+        walking.dispose();
     }
 }

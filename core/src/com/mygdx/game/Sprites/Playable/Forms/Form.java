@@ -27,8 +27,8 @@ public abstract class Form extends Sprite {
         runningRight = true;
         this.b2Body = b2Body;
     }
-    public abstract void setRightTriceFixture();
-    public abstract void setLeftTriceFixture();
+    public abstract void setRightFixture();
+    public abstract void setLeftFixture();
     public abstract State getState();
     public abstract void define();
     public abstract void update(float deltaTime);

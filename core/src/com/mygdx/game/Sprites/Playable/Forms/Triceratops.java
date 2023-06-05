@@ -16,9 +16,6 @@ import com.mygdx.game.Screens.PlayScreen;
 
 
 public class Triceratops extends Form {
-
-
-
     private TextureRegion triceratopsStand;
     private Animation triceratopsRun;
     private Animation triceratopsJump;
@@ -27,7 +24,6 @@ public class Triceratops extends Form {
 
     private AssetManager manager;
     private Sound walking;
-    private boolean setToExpose;
     private boolean exposed;
 
     public Triceratops(PlayScreen screen, Body b2Body){
@@ -54,15 +50,11 @@ public class Triceratops extends Form {
         triceratopsHit = new Animation(0.1f, frames);
         frames.clear();
         triceratopsStand = new TextureRegion(getTexture(), 522, 307, 58, 46);
-        setToExpose = false;
         exposed = true;
     }
 
     public void update(float deltaTime){
-        if(setToExpose && !exposed){
-
-        }
-        else if (!exposed) {
+        if (!exposed) {
             setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
             if (currentState == State.RUNNING) {
                 walking.resume();
@@ -91,12 +83,12 @@ public class Triceratops extends Form {
         }
         if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
             region.flip(true, false);
-            setLeftTriceFixture();
+            setLeftFixture();
             runningRight = false;
         }
         else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
             region.flip(true, false);
-            setRightTriceFixture();
+            setRightFixture();
             runningRight = true;
         }
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
@@ -116,21 +108,12 @@ public class Triceratops extends Form {
         else
             return State.STANDING;
     }
-    public void setRightTriceFixture(){
-        ChainShape shapeRight = new ChainShape();
-        Vector2[] vectors = new Vector2[11];
-        vectors[0] = new Vector2(32 / GameLogic.PPM, 3 / GameLogic.PPM);
-        vectors[1] = new Vector2(32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        vectors[2] = new Vector2(12 / GameLogic.PPM, 16 / GameLogic.PPM);
-        vectors[3] = new Vector2(7 / GameLogic.PPM, 15 / GameLogic.PPM);
-        vectors[4] = new Vector2(-12 / GameLogic.PPM, 6 / GameLogic.PPM);
-        vectors[5] = new Vector2(-29 / GameLogic.PPM, -2 / GameLogic.PPM);
-        vectors[6] = new Vector2(-29 / GameLogic.PPM, -3 / GameLogic.PPM);
-        vectors[7] = new Vector2(-24 / GameLogic.PPM, -5 / GameLogic.PPM);
-        vectors[8] = new Vector2(-14 / GameLogic.PPM, -12 / GameLogic.PPM);
-        vectors[9] = new Vector2(17 / GameLogic.PPM, -12 / GameLogic.PPM);
-        vectors[10] = new Vector2(28 / GameLogic.PPM, -4 / GameLogic.PPM);
-        shapeRight.createLoop(vectors);
+    public void setRightFixture(){
+        if (b2Body.getFixtureList().size >= 2){
+            while (b2Body.getFixtureList().size > 1) {
+                b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+            }
+        }
         FixtureDef fdefRight = new FixtureDef();
         fdefRight.filter.categoryBits = GameLogic.PLAYER_BIT;
         fdefRight.filter.maskBits = GameLogic.GROUND_BIT |
@@ -138,39 +121,18 @@ public class Triceratops extends Form {
                 GameLogic.ENEMY_BIT |
                 GameLogic.OBJECT_BIT |
                 GameLogic.ENEMY_HAND_BIT;
-        fdefRight.shape = shapeRight;
-        if(b2Body.getFixtureList().size > 2) {
-            b2Body.destroyFixture(b2Body.getFixtureList().get(0));
-            b2Body.destroyFixture(b2Body.getFixtureList().get(1));
-        }
-        b2Body.createFixture(fdefRight);
 
         EdgeShape head = new EdgeShape();
         head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
         fdefRight.shape = head;
         fdefRight.isSensor = true;
         b2Body.createFixture(fdefRight).setUserData("head");
-
-
     }
-    public void setLeftTriceFixture(){
-        ChainShape shapeLeft = new ChainShape();
-        Vector2[] vectors = new Vector2[11];
-        vectors[0] = new Vector2(-32 / GameLogic.PPM, 3 / GameLogic.PPM);
-        vectors[1] = new Vector2(-32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        vectors[2] = new Vector2(-12 / GameLogic.PPM, 16 / GameLogic.PPM);
-        vectors[3] = new Vector2(-7 / GameLogic.PPM, 15 / GameLogic.PPM);
-        vectors[4] = new Vector2(13 / GameLogic.PPM, 6 / GameLogic.PPM);
-        vectors[5] = new Vector2(29 / GameLogic.PPM, -2 / GameLogic.PPM);
-        vectors[6] = new Vector2(29 / GameLogic.PPM, -3 / GameLogic.PPM);
-        vectors[7] = new Vector2(24 / GameLogic.PPM, -7 / GameLogic.PPM);
-        vectors[8] = new Vector2(14 / GameLogic.PPM, -12 / GameLogic.PPM);
-        vectors[9] = new Vector2(-17 / GameLogic.PPM, -12 / GameLogic.PPM);
-        vectors[10] = new Vector2(-28 / GameLogic.PPM, -4 / GameLogic.PPM);
-        shapeLeft.createLoop(vectors);
-        if(b2Body.getFixtureList().size > 2) {
-            b2Body.destroyFixture(b2Body.getFixtureList().get(0));
-            b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+    public void setLeftFixture(){
+        if (b2Body.getFixtureList().size >= 2){
+            while (b2Body.getFixtureList().size > 1) {
+                b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+            }
         }
         FixtureDef fdefLeft = new FixtureDef();
         fdefLeft.filter.categoryBits = GameLogic.PLAYER_BIT;
@@ -179,9 +141,6 @@ public class Triceratops extends Form {
                 GameLogic.ENEMY_BIT |
                 GameLogic.OBJECT_BIT |
                 GameLogic.ENEMY_HAND_BIT;
-        fdefLeft.shape = shapeLeft;
-        b2Body.createFixture(fdefLeft);
-
         EdgeShape head = new EdgeShape();
         head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
         fdefLeft.shape = head;
@@ -197,14 +156,28 @@ public class Triceratops extends Form {
         walking.loop();
         setBounds(0, 0, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
         setRegion(triceratopsStand);
-        setRightTriceFixture();
-        setToExpose = false;
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(32 / GameLogic.PPM, 12 / GameLogic.PPM);
+        FixtureDef fdef = new FixtureDef();
+        fdef.filter.categoryBits = GameLogic.PLAYER_BIT;
+        fdef.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.OBJECT_BIT |
+                GameLogic.ENEMY_HAND_BIT;
+        fdef.shape = shape;
+        if (b2Body != null){
+            this.b2Body.createFixture(fdef).setUserData(this);
+        }
+        setRightFixture();
         exposed = false;
     }
     public void expose(){
-        setToExpose = true;
+        exposed = true;
         while (b2Body.getFixtureList().size != 0){
             b2Body.destroyFixture(b2Body.getFixtureList().get(b2Body.getFixtureList().size-1));
         }
+        walking.pause();
+        walking.dispose();
     }
 }

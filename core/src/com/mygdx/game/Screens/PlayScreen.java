@@ -61,7 +61,7 @@ public class PlayScreen implements Screen {
         manager.finishLoading();
         music = manager.get("audio/Music/KimMusic.mp3", Music.class);
         music.setLooping(true);
-        music.setVolume(1f);
+        music.setVolume(0.1f);
         music.play();
         world.setContactListener(new WorldContactListener());
         millyWarrior = new MillyWarrior(this, 128 / GameLogic.PPM, 32 / GameLogic.PPM);

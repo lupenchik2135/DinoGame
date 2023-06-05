@@ -60,5 +60,7 @@ public class Player {
             forms[currentForm].define();
         }
     }
-
+    public Form.State getState(){
+        return forms[currentForm].getState();
+    }
 }

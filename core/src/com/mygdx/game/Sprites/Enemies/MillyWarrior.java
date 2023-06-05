@@ -68,8 +68,8 @@ public class MillyWarrior extends Enemy{
         b2Body = world.createBody(bdef);
 
         FixtureDef fdef = new FixtureDef();
-        CircleShape shape = new CircleShape();
-        shape.setRadius(6 / GameLogic.PPM);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(8 / GameLogic.PPM, 8 / GameLogic.PPM);
         fdef.filter.categoryBits = GameLogic.ENEMY_BIT;
         fdef.filter.maskBits = GameLogic.GROUND_BIT |
                 GameLogic.STONE_WALL |
@@ -77,7 +77,7 @@ public class MillyWarrior extends Enemy{
                 GameLogic.PLAYER_BIT |
                 GameLogic.OBJECT_BIT;
         fdef.shape = shape;
-        b2Body.createFixture(fdef);
+        b2Body.createFixture(fdef).setUserData(this);
 
 //        PolygonShape hand = new PolygonShape();
 //        Vector2[] vectrice = new Vector2[4];
