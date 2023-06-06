@@ -2,26 +2,124 @@
 PlayableDinos.png
 size: 1024, 1024
 format: RGBA8888
-filter: Linear, Linear
+filter: Nearest, Nearest
 repeat: none
-Archeopterix
+Archeopteryx
   rotate: false
-  xy: 0, 2
-  size: 236, 558
-  orig: 236, 558
-  offset: 0, 0
+  xy: 478, 213
+  size: 225, 588
+  orig: 233, 588
+  offset: 3, 0
   index: -1
 Ichtio
   rotate: false
-  xy: 260, 2
-  size: 234, 749
+  xy: 2, 52
+  size: 224, 749
   orig: 234, 749
-  offset: 0, 0
+  offset: 5, 0
   index: -1
 Triceratops
   rotate: false
-  xy: 520, 2
-  size: 258, 721
+  xy: 228, 80
+  size: 248, 721
   orig: 258, 721
+  offset: 5, 0
+  index: -1
+Woodcutter
+  rotate: false
+  xy: 985, 753
+  size: 26, 48
+  orig: 48, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_attack1
+  rotate: false
+  xy: 705, 703
+  size: 270, 48
+  orig: 288, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_attack2
+  rotate: false
+  xy: 705, 603
+  size: 268, 48
+  orig: 288, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_attack3
+  rotate: false
+  xy: 705, 503
+  size: 267, 48
+  orig: 288, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_climb
+  rotate: false
+  xy: 705, 353
+  size: 262, 48
+  orig: 288, 48
+  offset: 5, 0
+  index: -1
+Woodcutter_craft
+  rotate: false
+  xy: 705, 403
+  size: 263, 48
+  orig: 288, 48
+  offset: 6, 0
+  index: -1
+Woodcutter_death
+  rotate: false
+  xy: 705, 753
+  size: 278, 48
+  orig: 288, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_hurt
+  rotate: false
+  xy: 478, 163
+  size: 123, 48
+  orig: 144, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_idle
+  rotate: false
+  xy: 2, 2
+  size: 169, 48
+  orig: 192, 48
+  offset: 1, 0
+  index: -1
+Woodcutter_jump
+  rotate: false
+  xy: 705, 553
+  size: 268, 48
+  orig: 288, 48
+  offset: 4, 0
+  index: -1
+Woodcutter_push
+  rotate: false
+  xy: 705, 453
+  size: 266, 48
+  orig: 288, 48
+  offset: 7, 0
+  index: -1
+Woodcutter_run
+  rotate: false
+  xy: 705, 653
+  size: 270, 48
+  orig: 288, 48
+  offset: 3, 0
+  index: -1
+Woodcutter_walk
+  rotate: false
+  xy: 705, 303
+  size: 257, 48
+  orig: 288, 48
+  offset: 7, 0
+  index: -1
+pixelHeart
+  rotate: false
+  xy: 228, 62
+  size: 16, 16
+  orig: 16, 16
   offset: 0, 0
   index: -1

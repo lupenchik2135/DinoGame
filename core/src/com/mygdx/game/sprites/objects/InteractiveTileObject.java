@@ -1,13 +1,14 @@
-package com.mygdx.game.Sprites;
+package com.mygdx.game.sprites.objects;
 
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.Screens.PlayScreen;
+import com.mygdx.game.screens.PlayScreen;
+import com.mygdx.game.sprites.playable.Player;
+import com.mygdx.game.sprites.playable.forms.Form;
 
 public abstract class InteractiveTileObject {
     protected World world;
@@ -15,8 +16,10 @@ public abstract class InteractiveTileObject {
     protected TiledMapTile tile;
     protected Rectangle bounds;
     protected Body body;
+    protected PlayScreen screen;
     protected  Fixture fixture;
     InteractiveTileObject(PlayScreen screen, Rectangle bounds){
+        this.screen = screen;
         this.world = screen.getWorld();
         this.map = screen.getMap();
         this.bounds = bounds;
@@ -35,7 +38,7 @@ public abstract class InteractiveTileObject {
         fdef.shape = shape;
         fixture = body.createFixture(fdef);
     }
-    public abstract void onHeadHit();
+    public abstract void onHeadHit(Player player);
     public void setCategoryFilter(short filterBit){
         Filter filter = new Filter();
         filter.categoryBits = filterBit;
