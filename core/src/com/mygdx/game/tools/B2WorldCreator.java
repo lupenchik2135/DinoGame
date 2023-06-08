@@ -1,19 +1,27 @@
 package com.mygdx.game.tools;
 
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.screens.PlayScreen;
-import com.mygdx.game.sprites.enemies.MillyWarrior;
+import com.mygdx.game.screens.Level;
+import com.mygdx.game.sprites.enemies.DistantEnemy;
+import com.mygdx.game.sprites.enemies.MillyEnemy;
+import com.mygdx.game.sprites.enemies.SmallEnemy;
 import com.mygdx.game.sprites.objects.Mud;
 import com.mygdx.game.sprites.objects.StoneWall;
+import com.mygdx.game.sprites.objects.Water;
 
 public class B2WorldCreator {
-    private final Array<MillyWarrior> millyWarriors;
-    public B2WorldCreator(PlayScreen screen){
+    private final Array<SmallEnemy> smallEnemies;
+    private final Array<MillyEnemy> millyEnemies;
+    private final Array<DistantEnemy> distantEnemies;
+    public B2WorldCreator(Level screen){
         World world = screen.getWorld();
         TiledMap tiledMap = screen.getMap();
         BodyDef bdef = new BodyDef();
@@ -39,20 +47,41 @@ public class B2WorldCreator {
             Rectangle rect = object.getRectangle();
             new StoneWall(screen, rect);
         }
-        //create mid
+        //create mud
         for (RectangleMapObject object : tiledMap.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = object.getRectangle();
             new Mud(screen, rect);
         }
         //create warriors
-        millyWarriors = new Array<>();
+        smallEnemies = new Array<>();
         for (RectangleMapObject object : tiledMap.getLayers().get(5).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = object.getRectangle();
-            millyWarriors.add(new MillyWarrior(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM));
+            smallEnemies.add(new SmallEnemy(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM));
+        }
+        millyEnemies = new Array<>();
+        for (RectangleMapObject object : tiledMap.getLayers().get(6).getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect = object.getRectangle();
+            millyEnemies.add(new MillyEnemy(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM));
+        }
+        distantEnemies = new Array<>();
+        for (RectangleMapObject object : tiledMap.getLayers().get(7).getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect = object.getRectangle();
+            distantEnemies.add(new DistantEnemy(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM));
+        }
+        //добавить воду
+        for (RectangleMapObject object : tiledMap.getLayers().get(8).getObjects().getByType(RectangleMapObject.class)){
+            Rectangle rect = object.getRectangle();
+            new Water(screen, rect);
         }
     }
 
-    public Array<MillyWarrior> getMillyWarriors() {
-        return millyWarriors;
+    public Array<SmallEnemy> getSmallEnemies() {
+        return smallEnemies;
+    }
+    public Array<MillyEnemy> getMillyEnemies() {
+        return millyEnemies;
+    }
+    public Array<DistantEnemy> getDistantEnemies() {
+        return distantEnemies;
     }
 }

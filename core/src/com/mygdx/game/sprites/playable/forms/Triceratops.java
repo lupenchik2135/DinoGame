@@ -6,13 +6,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.screens.PlayScreen;
+import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.playable.Player;
 
 
 public class Triceratops extends Form {
 
-    public Triceratops(PlayScreen screen, Player player){
+    public Triceratops(Level screen, Player player){
         super(screen, "Triceratops", player);
         this.type = "Triceratops";
         for(int i = 0; i < 7; i++){
@@ -29,9 +29,13 @@ public class Triceratops extends Form {
         for(int i = 0; i < 4; i++){
             frames.add(new TextureRegion(getTexture(),228 + i * 60, 230, 58, 48));
         }
-        hitAnimation = new Animation<>(0.1f, frames);
+        hitAnimation = new Animation<>(0.2f, frames);
         frames.clear();
         standTexture = new TextureRegion(getTexture(), 228, 386, 58, 46);
+        velocityX = 200 / GameLogic.PPM;
+        jumpHeight = 300 / GameLogic.PPM;
+        currentFormHealth = 4;
+        damage = 3;
     }
 
     public TextureRegion getFrame(float deltaTime){
@@ -46,12 +50,37 @@ public class Triceratops extends Form {
                 break;
             case JUMPING:
                 region = jumpAnimation.getKeyFrame(stateTimer);
+                player.ableToJump(false);
                 break;
             case RUNNING:
                 region = runAnimation.getKeyFrame(stateTimer, true);
                 break;
             case HITTING:
                 region = hitAnimation.getKeyFrame(stateTimer);
+                if(runningRight){
+                    FixtureDef fdefRight = new FixtureDef();
+                    fdefRight.filter.categoryBits = GameLogic.PLAYER_ATTACK_BIT;
+                    EdgeShape head = new EdgeShape();
+                    head.set(34 / GameLogic.PPM, 0 / GameLogic.PPM, 34 / GameLogic.PPM, 9 / GameLogic.PPM);
+                    fdefRight.shape = head;
+                    fdefRight.isSensor = true;
+                    player.b2Body.createFixture(fdefRight).setUserData(player);
+                }
+                else{
+                    FixtureDef fdefLeft = new FixtureDef();
+                    fdefLeft.filter.categoryBits = GameLogic.PLAYER_ATTACK_BIT;
+                    EdgeShape head = new EdgeShape();
+                    head.set(-34 / GameLogic.PPM, 0 / GameLogic.PPM, -34 / GameLogic.PPM, 9 / GameLogic.PPM);
+                    fdefLeft.shape = head;
+                    fdefLeft.isSensor = true;
+                    player.b2Body.createFixture(fdefLeft).setUserData(player);
+                }
+                if(hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 2){
+                   while (player.b2Body.getFixtureList().size > 1) {
+                            player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
+                   }
+                   isHitting = false;
+                }
                 break;
             case FALLING:
             case STANDING:
@@ -61,12 +90,10 @@ public class Triceratops extends Form {
         }
         if ((player.b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
             region.flip(true, false);
-            setLeftFixture();
             runningRight = false;
         }
         else if (((player.b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
             region.flip(true, false);
-            setRightFixture();
             runningRight = true;
         }
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
@@ -77,53 +104,31 @@ public class Triceratops extends Form {
         if(runChangeAnimation){
             return State.CHANGING;
         }
+        else if (isHitting || Gdx.input.justTouched()){
+            isHitting = true;
+            return State.HITTING;
+        }
         else if (player.b2Body.getLinearVelocity().y > 0 || (player.b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
                 return State.JUMPING;
         else if (player.b2Body.getLinearVelocity().y < 0)
                 return State.FALLING;
         else if (player.b2Body.getLinearVelocity().x != 0)
             return State.RUNNING;
-        else if (Gdx.input.isTouched()){
-            return State.HITTING;
-        }
         else
             return State.STANDING;
     }
-    public void setRightFixture(){
-        if (player.b2Body.getFixtureList().size >= 2){
-            while (player.b2Body.getFixtureList().size > 1) {
-                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
-            }
-        }
-        FixtureDef fdefRight = new FixtureDef();
-        fdefRight.filter.categoryBits = GameLogic.HEAD_BIT;
-        EdgeShape head = new EdgeShape();
-        head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefRight.shape = head;
-        fdefRight.isSensor = true;
-        player.b2Body.createFixture(fdefRight).setUserData(player);
-    }
-    public void setLeftFixture(){
-        if (player.b2Body.getFixtureList().size >= 2){
-            while (player.b2Body.getFixtureList().size > 1) {
-                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
-            }
-        }
-        FixtureDef fdefLeft = new FixtureDef();
-        fdefLeft.filter.categoryBits = GameLogic.HEAD_BIT;
-        EdgeShape head = new EdgeShape();
-        head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefLeft.shape = head;
-        fdefLeft.isSensor = true;
-        player.b2Body.createFixture(fdefLeft).setUserData(player);
-    }
     public void define(){
-        player.health = 5;
+
         walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
         walking.play(0.5f, 10, 10);
         walking.loop();
-        setBounds(0, 0, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
-        setRegion(standTexture);
+        if (player.b2Body.getFixtureList().size >= 2){
+            while (player.b2Body.getFixtureList().size > 1) {
+                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
+            }
+        }
+
+        setBounds(player.b2Body.getPosition().x, player.b2Body.getPosition().y, 64 / GameLogic.PPM, 32 / GameLogic.PPM);
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(32 / GameLogic.PPM, 12 / GameLogic.PPM);
         FixtureDef fdef = new FixtureDef();
@@ -132,13 +137,15 @@ public class Triceratops extends Form {
                 GameLogic.STONE_WALL |
                 GameLogic.ENEMY_BIT |
                 GameLogic.OBJECT_BIT |
-                GameLogic.ENEMY_HEAD_BIT |
+                GameLogic.SMALL_ENEMY_BIT |
+                GameLogic.SMALL_ENEMY_HEAD_BIT |
+                GameLogic.WATER_BIT |
                 GameLogic.ITEM_BIT;
         fdef.shape = shape;
         if (player.b2Body != null){
             this.player.b2Body.createFixture(fdef).setUserData(player);
         }
-        setRightFixture();
+
         destroyed = false;
     }
 }

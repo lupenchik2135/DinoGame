@@ -4,13 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.scenes.Hud;
-import com.mygdx.game.screens.PlayScreen;
+import com.mygdx.game.screens.Level;
+import com.mygdx.game.screens.LevelOne;
 import com.mygdx.game.sprites.playable.Player;
-import com.mygdx.game.sprites.playable.forms.Form;
 
 public class StoneWall extends InteractiveTileObject {
 
-    public StoneWall(PlayScreen screen, Rectangle bounds) {
+    public StoneWall(Level screen, Rectangle bounds) {
         super(screen, bounds);
         fixture.setUserData(this);
         setCategoryFilter(GameLogic.STONE_WALL);

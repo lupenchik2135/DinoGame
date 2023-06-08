@@ -2,7 +2,6 @@ package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
@@ -15,41 +14,23 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.scenes.Hud;
 import com.mygdx.game.sprites.enemies.Enemy;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.items.Item;
-import com.mygdx.game.sprites.objects.ItemDef;
+import com.mygdx.game.sprites.objects.ObjectDef;
 import com.mygdx.game.sprites.playable.forms.Form;
 import com.mygdx.game.sprites.playable.Player;
+import com.mygdx.game.sprites.projectiles.Projectile;
+import com.mygdx.game.sprites.projectiles.Spit;
 import com.mygdx.game.tools.B2WorldCreator;
 import com.mygdx.game.tools.WorldContactListener;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class PlayScreen implements Screen {
-    private GameLogic game;
-    private TextureAtlas atlas;
-
-    private OrthographicCamera gameCam;
-    private Viewport gamePort;
-    private Hud hud;
-    private AssetManager manager;
-    private Music music;
-
-    private TmxMapLoader mapLoader;
-    private TiledMap map;
-    private OrthogonalTiledMapRenderer renderer;
-    private B2WorldCreator creator;
-    private World world;
-    private Box2DDebugRenderer b2dr;
-    private Player player;
-
-    private Array<Item> items;
-    public LinkedBlockingQueue<ItemDef> itemsToSpawn;
-    public PlayScreen(GameLogic game){
+public class LevelOne extends Level {
+    public LevelOne(GameLogic game){
         atlas = new TextureAtlas("PlayableDinos.atlas");
         this.game = game;
         gameCam = new OrthographicCamera();
@@ -73,16 +54,19 @@ public class PlayScreen implements Screen {
         world.setContactListener(new WorldContactListener());
 
         items = new Array<Item>();
-        itemsToSpawn = new LinkedBlockingQueue<>();
+        projectiles = new Array<Projectile>();
+        objectsToSpawn = new LinkedBlockingQueue<>();
     }
-    public void spawnItem(ItemDef itemDef){
-        itemsToSpawn.add(itemDef);
+    public void spawnObject(ObjectDef objectDef){
+        objectsToSpawn.add(objectDef);
     }
-    public void handleSpawningItems(){
-        if (!itemsToSpawn.isEmpty()){
-            ItemDef itemDef = itemsToSpawn.poll();
-            if(itemDef.type == Heart.class){
-                items.add(new Heart(this, itemDef.position.x, itemDef.position.y));
+    public void handleSpawningObjects(){
+        if (!objectsToSpawn.isEmpty()){
+            ObjectDef objectDef = objectsToSpawn.poll();
+            if(objectDef.type == Heart.class){
+                items.add(new Heart(this, objectDef.position.x, objectDef.position.y));
+            }else if(objectDef.type == Spit.class){
+                projectiles.add(new Spit(this, objectDef.position.x, objectDef.position.y));
             }
         }
     }
@@ -91,37 +75,18 @@ public class PlayScreen implements Screen {
         return atlas;
     }
 
-    public void handleInput(float deltaTime){
-        if(player.getState() != Form.State.CHANGING){
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-                player.b2Body.applyLinearImpulse(new Vector2(0, 4f), player.b2Body.getWorldCenter(), true);
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.D) && player.b2Body.getLinearVelocity().x <= 2) {
-                player.b2Body.applyLinearImpulse(new Vector2(0.1f, 0), player.b2Body.getWorldCenter(), true);
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -2) {
-                player.b2Body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2Body.getWorldCenter(), true);
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-                player.setCurrentForm(0);
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-                player.setCurrentForm(1);
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-                player.setCurrentForm(2);
-            }
-            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
-                player.setCurrentForm(3);
-            }
-        }
-    }
     public void update(float deltaTime){
         handleInput(deltaTime);
-        handleSpawningItems();
+        handleSpawningObjects();
         world.step(1/60f, 6, 2);
         player.update(deltaTime);
-        for (Enemy enemy : creator.getMillyWarriors()){
+        for (Enemy enemy : creator.getSmallEnemies()){
+            enemy.update(deltaTime);
+            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
+                enemy.b2Body.setActive(true);
+            }
+        }
+        for (Enemy enemy : creator.getSmallEnemies()){
             enemy.update(deltaTime);
             if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
                 enemy.b2Body.setActive(true);
@@ -130,7 +95,13 @@ public class PlayScreen implements Screen {
         for (Item item : items){
             item.update(deltaTime);
         }
-        gameCam.position.x = player.b2Body.getPosition().x;
+        for (Projectile projectile : projectiles){
+            projectile.update(deltaTime);
+        }
+        if(player.getState() != Form.State.DEAD && player.b2Body.getPosition().x > GameLogic.V_WIDTH / GameLogic.PPM - player.b2Body.getPosition().x) {
+            Gdx.app.log("cam", "position " + player.b2Body.getPosition().x);
+            gameCam.position.x = player.b2Body.getPosition().x;
+        }
         gameCam.update();
         hud.update(deltaTime);
         renderer.setView(gameCam);
@@ -143,22 +114,35 @@ public class PlayScreen implements Screen {
     @Override
     public void render(float delta) {
         update(delta);
+
         Gdx.gl.glClearColor(0, 0, 0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         renderer.render();
+
         b2dr.render(world, gameCam.combined);
-        game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
-        hud.stage.draw();
+
         game.batch.setProjectionMatrix(gameCam.combined);
         game.batch.begin();
         player.draw(game.batch);
-        for (Enemy enemy : creator.getMillyWarriors()){
+        for (Enemy enemy : creator.getSmallEnemies()){
             enemy.draw(game.batch);
         }
         for (Item item : items){
             item.draw(game.batch);
         }
+        for (Projectile projectile : projectiles){
+            projectile.draw(game.batch);
+        }
         game.batch.end();
+
+        game.batch.setProjectionMatrix(hud.stage.getCamera().combined);
+        hud.stage.draw();
+
+        if(gameOver()) {
+            game.setScreen(new GameOverScreen(game));
+            dispose();
+        }
     }
 
     @Override
@@ -173,7 +157,12 @@ public class PlayScreen implements Screen {
     public World getWorld(){
         return world;
     }
-
+    public boolean gameOver(){
+        if(player.getState() == Form.State.DEAD && player.getStateTimer() > 3){
+            return true;
+        }
+        return false;
+    }
     @Override
     public void pause() {
 

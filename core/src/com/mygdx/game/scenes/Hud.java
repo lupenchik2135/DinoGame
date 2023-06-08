@@ -49,7 +49,7 @@ public class Hud implements Disposable {
         levelLabel = new Label("1-1", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         worldLabel = new Label("WORLD", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
         playerLabel = new Label("PLAYER", new Label.LabelStyle(new BitmapFont(), Color.WHITE));
-        playerHealthLabel = new Label(String.format("%03d", player.health), new Label.LabelStyle(new BitmapFont(), Color.RED));
+        playerHealthLabel = new Label(String.format("%03d", player.getHealth()), new Label.LabelStyle(new BitmapFont(), Color.RED));
 
         table.add(playerLabel).expandX().padTop(10);
         table.add(worldLabel).expandX().padTop(10);
@@ -71,7 +71,7 @@ public class Hud implements Disposable {
             countdownLabel.setText(String.format("%03d", worldTimer));
             timeCount = 0;
         }
-        playerHealthLabel.setText(String.format("%03d", player.health));
+        playerHealthLabel.setText(String.format("%01d", player.getHealth()));
     }
     public static void addScore (int value){
         score += value;

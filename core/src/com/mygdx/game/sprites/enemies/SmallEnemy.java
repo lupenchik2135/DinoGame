@@ -9,20 +9,18 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.screens.PlayScreen;
+import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.items.Heart;
-import com.mygdx.game.sprites.objects.ItemDef;
+import com.mygdx.game.sprites.objects.ObjectDef;
 
 
-public class MillyWarrior extends Enemy{
+public class SmallEnemy extends Enemy{
     private float stateTime;
-    private Animation standAnimation;
     private Animation walkAnimation;
     private boolean runningRight;
-    private boolean setToDestroy;
-    private PlayScreen screen;
+    private Level screen;
     private boolean destroyed;
-    public MillyWarrior(PlayScreen screen, float x, float y) {
+    public SmallEnemy(Level screen, float x, float y) {
         super(screen,"Archeopteryx", x, y);
         this.screen = screen;
         Array<TextureRegion> frames = new Array<TextureRegion>();
@@ -45,7 +43,7 @@ public class MillyWarrior extends Enemy{
             destroyed = true;
             setBounds(getX(), getY(), 16 / GameLogic.PPM, 8 / GameLogic.PPM);
             stateTime = 0;
-            screen.spawnItem(new ItemDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y + 16 / GameLogic.PPM),
+            screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y),
                     Heart.class));
         }
         else if (!destroyed){
@@ -77,10 +75,11 @@ public class MillyWarrior extends Enemy{
         FixtureDef fdef = new FixtureDef();
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(8 / GameLogic.PPM, 8 / GameLogic.PPM);
-        fdef.filter.categoryBits = GameLogic.ENEMY_BIT;
+        fdef.filter.categoryBits = GameLogic.SMALL_ENEMY_BIT;
         fdef.filter.maskBits = GameLogic.GROUND_BIT |
                 GameLogic.STONE_WALL |
                 GameLogic.ENEMY_BIT |
+                GameLogic.SMALL_ENEMY_BIT |
                 GameLogic.PLAYER_BIT |
                 GameLogic.OBJECT_BIT;
         fdef.shape = shape;
@@ -88,14 +87,15 @@ public class MillyWarrior extends Enemy{
 
         PolygonShape hand = new PolygonShape();
         Vector2[] vectrice = new Vector2[4];
-        vectrice[0] = new Vector2(-6, 8).scl(1/GameLogic.PPM);
-        vectrice[1] = new Vector2(6, 8).scl(1/GameLogic.PPM);
-        vectrice[2] = new Vector2(-2, 3).scl(1/GameLogic.PPM);
-        vectrice[3] = new Vector2(2, 3).scl(1/GameLogic.PPM);
+        vectrice[0] = new Vector2(-6.5f, 9).scl(1/GameLogic.PPM);
+        vectrice[1] = new Vector2(6.5f, 9).scl(1/GameLogic.PPM);
+        vectrice[2] = new Vector2(-4, 3).scl(1/GameLogic.PPM);
+        vectrice[3] = new Vector2(4, 3).scl(1/GameLogic.PPM);
         hand.set(vectrice);
 
         fdef.shape = hand;
-        fdef.filter.categoryBits = GameLogic.ENEMY_HEAD_BIT;
+        fdef.restitution = 0.5f;
+        fdef.filter.categoryBits = GameLogic.SMALL_ENEMY_HEAD_BIT;
         fdef.filter.maskBits = GameLogic.GROUND_BIT |
                 GameLogic.STONE_WALL |
                 GameLogic.ENEMY_BIT |
@@ -109,7 +109,6 @@ public class MillyWarrior extends Enemy{
             super.draw(batch);
         }
     }
-    @Override
     public void hitOnHead() {
         setToDestroy = true;
     }
