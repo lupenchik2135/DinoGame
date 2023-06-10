@@ -17,71 +17,41 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.GameLogic;
 
-public class MainMenu implements Screen {
+public class Victory implements Screen {
     private Viewport viewport;
     private Stage stage;
 
     private Game game;
-    public MainMenu(final Game game){
+    public Victory(final Game game){
         this.game = game;
         viewport = new FitViewport(GameLogic.V_WIDTH, GameLogic.V_HEIGHT, new OrthographicCamera());
         stage = new Stage(viewport, ((GameLogic) game).getBatch());
         Gdx.input.setInputProcessor(stage);
-        Label.LabelStyle font = new Label.LabelStyle(new BitmapFont(), Color.BLUE);
+        Label.LabelStyle font = new Label.LabelStyle(new BitmapFont(), Color.GREEN);
 
         Table table = new Table();
         table.center();
         table.setFillParent(true);
 
-        Label gameName = new Label("DINO GAME", font);
+        Label gameOverLabel = new Label("GAME WIN !!!!!", font);
+
+
         TextButton.TextButtonStyle textButtonStyle = new TextButton.TextButtonStyle();
         textButtonStyle.font = new BitmapFont();
         textButtonStyle.fontColor = Color.WHITE;
-        TextButton levelOneButton = new TextButton("Level One ", textButtonStyle);
-        levelOneButton.addListener(new ClickListener() {
+        TextButton button = new TextButton("Main Menu", textButtonStyle);
+        button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 // закрытие текущего экрана
-                game.setScreen(new LevelOne((GameLogic) game));
+                game.setScreen(new MainMenu(game));
                 dispose();
-            }
-        });
-        TextButton levelTwoButton = new TextButton("Level Two ", textButtonStyle);
-        levelTwoButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // закрытие текущего экрана
-                game.setScreen(new LevelTwo((GameLogic) game));
-                dispose();
-            }
-        });
-        TextButton levelThreeButton = new TextButton("Level Three ", textButtonStyle);
-        levelThreeButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // закрытие текущего экрана
-                game.setScreen(new LevelThree((GameLogic) game));
-                dispose();
-            }
-        });
-        TextButton exitButton = new TextButton("Exit", textButtonStyle);
-        exitButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // закрытие текущего экрана
-                Gdx.app.exit();
             }
         });
 
-        table.add(gameName).expandX();
+        table.add(gameOverLabel).expandX();
         table.row();
-        table.add(levelOneButton).expandX().padTop(10);
-        table.row();
-        table.add(levelTwoButton).expandX().padTop(10);
-        table.row();
-        table.add(levelThreeButton).expandX().padTop(10);
-        table.row();
-        table.add(exitButton).expandX().padTop(10);
+        table.add(button).expandX().padTop(10);
 
         stage.addActor(table);
     }
@@ -93,7 +63,7 @@ public class MainMenu implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClearColor(0.3f, 0.1f, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.draw();
 

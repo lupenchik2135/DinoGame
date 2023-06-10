@@ -3,10 +3,10 @@ package com.mygdx.game.sprites.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.scenes.Hud;
 import com.mygdx.game.screens.Level;
-import com.mygdx.game.screens.LevelOne;
 import com.mygdx.game.sprites.playable.Player;
+
+import java.util.Objects;
 
 public class StoneWall extends InteractiveTileObject {
 
@@ -18,11 +18,9 @@ public class StoneWall extends InteractiveTileObject {
 
     @Override
     public void onHeadHit(Player player) {
-        if(player.getCurrentForm().getType() == "Triceratops"){
-            Gdx.app.log("stone", "collusion");
+        if(Objects.equals(player.getCurrentForm().getType(), "Triceratops")){
             setCategoryFilter(GameLogic.DESTROYED_BIT);
             getCell().setTile(null);
-            Hud.addScore(100);
         }
     }
 }

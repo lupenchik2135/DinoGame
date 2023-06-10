@@ -7,13 +7,12 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
-import com.mygdx.game.screens.LevelOne;
 import com.mygdx.game.sprites.playable.Player;
 
 public class Heart extends Item{
-    public Heart(Level screen, float x, float y){
+    public Heart(Level screen, float x, float y, boolean right){
         super(screen, x, y);
-        setRegion(screen.getAtlas().findRegion("pixelHeart"), 0, 0, 16, 16);
+        setRegion(screen.getAtlas().findRegion("Projectiles"), 2, 2, 16, 16);
         velocity = new Vector2(0,0);
     }
     @Override
@@ -31,14 +30,13 @@ public class Heart extends Item{
         fdef.filter.categoryBits = GameLogic.ITEM_BIT;
         fdef.filter.maskBits = GameLogic.GROUND_BIT |
                 GameLogic.STONE_WALL |
-                GameLogic.PLAYER_BIT |
-                GameLogic.OBJECT_BIT;
+                GameLogic.TYRANNOSAUR_BIT|
+                GameLogic.PLAYER_BIT;
         body.createFixture(fdef).setUserData(this);
     }
 
     @Override
     public void use(Player player) {
-        Gdx.app.log("heart", "using");
         isUsing = true;
         player.getHeal();
         isUsing = false;

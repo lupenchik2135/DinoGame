@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.World;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
-import com.mygdx.game.screens.LevelOne;
 import com.mygdx.game.sprites.playable.Player;
 
 public abstract class Item extends Sprite {
@@ -19,11 +18,11 @@ public abstract class Item extends Sprite {
     protected boolean isUsing;
     protected Body body;
 
-    public Item(Level screen, float x, float y){
+    protected Item(Level screen, float x, float y){
         this.screen = screen;
         this.world = screen.getWorld();
         setPosition(x, y);
-        setBounds(getX(), getY(), 4 / GameLogic.PPM, 4 / GameLogic.PPM);
+        setBounds(getX(), getY(), 8 / GameLogic.PPM, 8 / GameLogic.PPM);
         defineItem();
         toDestroy = false;
         destroyed = false;
@@ -36,6 +35,7 @@ public abstract class Item extends Sprite {
             destroyed = true;
         }
     }
+    @Override
     public void draw(Batch batch){
         if(!destroyed){
             super.draw(batch);

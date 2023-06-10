@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.sprites.enemies.Enemy;
 import com.mygdx.game.sprites.enemies.SmallEnemy;
+import com.mygdx.game.sprites.enemies.Worm;
 import com.mygdx.game.sprites.items.Item;
 import com.mygdx.game.sprites.objects.InteractiveTileObject;
 import com.mygdx.game.sprites.playable.Player;
@@ -27,7 +28,16 @@ public class WorldContactListener implements ContactListener {
                 else
                     ((InteractiveTileObject) fixA.getUserData()).onHeadHit((Player) fixB.getUserData());
                 break;
-            //player stands on enemy
+            case GameLogic.CHECK_BIT | GameLogic.GROUND_BIT:
+            case GameLogic.CHECK_BIT | GameLogic.WATER_BIT:
+            case GameLogic.CHECK_BIT | GameLogic.STONE_WALL:
+                if(fixA.getFilterData().categoryBits == GameLogic.CHECK_BIT)
+                    ((Player)fixA.getUserData()).isAbleToChange(false);
+                else
+                    ((Player)fixB.getUserData()).isAbleToChange(false);
+                break;
+                //player stands on enemy
+            case GameLogic.SMALL_ENEMY_HEAD_BIT | GameLogic.TYRANNOSAUR_BIT:
             case GameLogic.SMALL_ENEMY_HEAD_BIT | GameLogic.PLAYER_BIT:
                 if(fixA.getFilterData().categoryBits == GameLogic.SMALL_ENEMY_HEAD_BIT)
                     ((SmallEnemy)fixA.getUserData()).hitOnHead();
@@ -35,54 +45,53 @@ public class WorldContactListener implements ContactListener {
                     ((SmallEnemy)fixB.getUserData()).hitOnHead();
                 break;
             //small enemy touches object
-            case GameLogic.ENEMY_BIT | GameLogic.OBJECT_BIT:
-            case GameLogic.SMALL_ENEMY_BIT | GameLogic.OBJECT_BIT:
-                if(fixA.getFilterData().categoryBits == GameLogic.ENEMY_BIT)
+            case GameLogic.ENEMY_BIT | GameLogic.ENEMY_STOPPER:
+            case GameLogic.SMALL_ENEMY_BIT | GameLogic.ENEMY_STOPPER:
+                if(fixA.getFilterData().categoryBits == GameLogic.ENEMY_BIT || fixA.getFilterData().categoryBits == GameLogic.SMALL_ENEMY_BIT)
                     ((Enemy) fixA.getUserData()).reverseVelocity(true, false);
                 else
                     ((Enemy) fixB.getUserData()).reverseVelocity(true, false);
                 break;
             // player collides with small enemy
             case GameLogic.PLAYER_BIT | GameLogic.SMALL_ENEMY_BIT:
-                if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT)
+                if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT) {
                     ((Player) fixA.getUserData()).getHitted();
-                else
+                    ((Enemy) fixB.getUserData()).reverseVelocity(true, false);
+                }else {
                     ((Player) fixB.getUserData()).getHitted();
+                    ((Enemy) fixA.getUserData()).reverseVelocity(true, false);
+                }
                 break;
             //enemy collides with other objects
             case (GameLogic.ENEMY_BIT):
             //small enemy collides with other objects
             case (GameLogic.SMALL_ENEMY_BIT):
+            case (GameLogic.SMALL_ENEMY_BIT | GameLogic.ENEMY_BIT):
                 ((Enemy) fixA.getUserData()).reverseVelocity(true, false);
                 ((Enemy) fixB.getUserData()).reverseVelocity(true, false);
                 break;
             //item collides with player
+            case GameLogic.ITEM_BIT | GameLogic.TYRANNOSAUR_BIT:
             case GameLogic.ITEM_BIT | GameLogic.PLAYER_BIT:
                 if(fixA.getFilterData().categoryBits == GameLogic.ITEM_BIT)
                     ((Item) fixA.getUserData()).use((Player) fixB.getUserData());
                 else
                     ((Item)fixB.getUserData()).use((Player) fixA.getUserData());
                 break;
-            case GameLogic.PLAYER_BIT | GameLogic.GROUND_BIT:
-                if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT)
-                    ((Player) fixA.getUserData()).ableToJump(true);
-                else
-                    ((Player) fixB.getUserData()).ableToJump(true);
-                break;
             case GameLogic.PLAYER_BIT | GameLogic.WATER_BIT:
-                Gdx.app.log("water", "collision");
                 if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT)
                     ((Player) fixA.getUserData()).swim();
+
                 else
                     ((Player) fixB.getUserData()).swim();
                 break;
             // player collides with enemy
+            case GameLogic.TYRANNOSAUR_BIT | GameLogic.ENEMY_BIT:
             case GameLogic.PLAYER_ATTACK_BIT | GameLogic.ENEMY_BIT:
-                if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_ATTACK_BIT) {
+                if(fixB.getFilterData().categoryBits == GameLogic.ENEMY_BIT) {
                     ((Enemy) fixB.getUserData()).getHit(((Player) fixA.getUserData()).getCurrentForm().getDamage());
                 }
                 else {
-                    Gdx.app.log("Player attack with enemy", "collision");
                     ((Enemy) fixA.getUserData()).getHit(((Player) fixB.getUserData()).getCurrentForm().getDamage());
                 }
                 break;
@@ -94,6 +103,22 @@ public class WorldContactListener implements ContactListener {
                     ((Player) fixA.getUserData()).getHitted();
                 }
                 break;
+            case GameLogic.PLAYER_BIT | GameLogic.ENEMY_BIT:
+                if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT) {
+                    if(((Enemy) fixB.getUserData()).getClass().isAssignableFrom(Worm.class)){
+                        ((Player) fixA.getUserData()).getHitted();
+                    }else {
+                        ((Enemy) fixB.getUserData()).reverseVelocity(true, false);
+                    }
+                }
+                else {
+                    if(((Enemy) fixA.getUserData()).getClass().isAssignableFrom(Worm.class)){
+                        ((Player) fixA.getUserData()).getHitted();
+                    }else {
+                        ((Enemy) fixB.getUserData()).reverseVelocity(true, false);
+                    }
+                }
+                break;
             case GameLogic.PROJECTILE_BIT | GameLogic.ENEMY_BIT:
                 if(fixA.getFilterData().categoryBits == GameLogic.PROJECTILE_BIT) {
                     ((Enemy) fixB.getUserData()).getHit(((Projectile) fixA.getUserData()).getDamage());
@@ -103,12 +128,13 @@ public class WorldContactListener implements ContactListener {
                 }
                 break;
             case GameLogic.PROJECTILE_BIT | GameLogic.PLAYER_BIT:
-                Gdx.app.log("enemy attack with player", "collision");
                 if(fixA.getFilterData().categoryBits == GameLogic.PROJECTILE_BIT) {
                     ((Player) fixB.getUserData()).getHitted();
+                    ((Projectile) fixA.getUserData()).hitted();
                 }
                 else {
                     ((Player) fixA.getUserData()).getHitted();
+                    ((Projectile) fixB.getUserData()).hitted();
                 }
                 break;
             default:
@@ -124,15 +150,24 @@ public class WorldContactListener implements ContactListener {
         int cDef = fixA.getFilterData().categoryBits | fixB.getFilterData().categoryBits;
         switch (cDef){
             case GameLogic.PLAYER_BIT | GameLogic.WATER_BIT:
-            Gdx.app.log("water", "end collision");
             if(fixA.getFilterData().categoryBits == GameLogic.PLAYER_BIT && ((Player) fixA.getUserData()).getState() == Form.State.SWIMMING)
                 ((Ichtiozaur)((Player) fixA.getUserData()).getCurrentForm()).setSwimming(false);
             else
                 ((Ichtiozaur)((Player) fixB.getUserData()).getCurrentForm()).setSwimming(false);
             break;
+            case GameLogic.CHECK_BIT | GameLogic.GROUND_BIT:
+            case GameLogic.CHECK_BIT | GameLogic.WATER_BIT:
+            case GameLogic.CHECK_BIT | GameLogic.STONE_WALL:
+                Gdx.app.log("Collision", "checkBit");
+                if(fixA.getFilterData().categoryBits == GameLogic.CHECK_BIT)
+                    ((Player)fixA.getUserData()).isAbleToChange(true);
+                else
+                    ((Player)fixB.getUserData()).isAbleToChange(true);
+                break;
             default:
                 break;
         }
+
     }
 
     @Override

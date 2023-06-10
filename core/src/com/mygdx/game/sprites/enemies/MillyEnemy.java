@@ -1,5 +1,6 @@
 package com.mygdx.game.sprites.enemies;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,41 +18,34 @@ import com.mygdx.game.sprites.objects.ObjectDef;
 public class MillyEnemy extends Enemy{
     private Animation<TextureRegion> walkAnimation;
     private Animation<TextureRegion> hitAnimation;
-    private TextureRegion deathTexture;
 
     private boolean runningRight;
-    private Level screen;
-    private boolean destroyed;
 
     public MillyEnemy(Level screen, float x, float y) {
-        super(screen, "Archeopteryx", x, y);
+        super(screen, "Mobs", x, y);
         this.screen = screen;
-        Array<TextureRegion> frames = new Array<TextureRegion>();
-        for (int i = 0; i <= 5; i ++){
-            if (i <= 2) frames.add(new TextureRegion(getTexture(), 479 + (i * 64), 225 + 431, 60, 30));
-            else frames.add(new TextureRegion(getTexture(), 479 + ((i - 3) * 64), 225 + 466, 60, 30));
-        }
+        Array<TextureRegion> frames = new Array<>();
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82 + 77, 57, 37, 19));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82 + 77 + 57, 57, 38, 19));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82 + 77 + 57 + 58, 56, 38, 20));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82 + 77 + 57 + 58 + 58, 56, 42, 19));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82 + 77 + 57 + 58 + 58 + 62, 56, 37, 20));
         walkAnimation = new Animation<>(0.1f, frames);
         frames.clear();
-        for (int i = 0; i <= 5; i ++){
-            if (i <= 2) frames.add(new TextureRegion(getTexture(), 479 + (i * 64), 225 + 431, 60, 30));
-            else frames.add(new TextureRegion(getTexture(), 479 + ((i - 3) * 64), 225 + 466, 60, 30));
-        }
-        hitAnimation = new Animation<>(0.1f, frames);
+        frames.add(new TextureRegion(getTexture(), 4537, 63, 51, 14));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71, 68, 62, 8));
+        frames.add(new TextureRegion(getTexture(), 4537 + 71 + 82, 56, 57, 19));
+        hitAnimation = new Animation<>(0.3f, frames);
         frames.clear();
-        deathTexture = new TextureRegion(getTexture(), 479, 225 + 431, 60, 30);
         stateTime = 0;
         setBounds(getX(), getY(), 16 / GameLogic.PPM, 16 / GameLogic.PPM);
         currentState = previousState = State.RUNNING;
         setToDestroy = false;
         destroyed = false;
-        health = 6;
+        health = 10;
     }
     public State getState(){
-        if(destroyed){
-            return State.DEAD;
-        }
-        else if (isHitting){
+        if (isHitting){
             return State.HITTING;
         }
         return State.RUNNING;
@@ -60,16 +54,12 @@ public class MillyEnemy extends Enemy{
         currentState = getState();
         TextureRegion region;
         switch (currentState){
-            case DEAD:
-                region = walkAnimation.getKeyFrame(stateTime);
-                break;
             case HITTING:
-                region = hitAnimation.getKeyFrame(stateTime);
                 if(runningRight){
                     FixtureDef fdefRight = new FixtureDef();
                     fdefRight.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
                     EdgeShape head = new EdgeShape();
-                    head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
+                    head.set(9f / GameLogic.PPM, 0 / GameLogic.PPM, 9f / GameLogic.PPM, 9 / GameLogic.PPM);
                     fdefRight.shape = head;
                     fdefRight.isSensor = true;
                     b2Body.createFixture(fdefRight).setUserData(this);
@@ -77,17 +67,21 @@ public class MillyEnemy extends Enemy{
                     FixtureDef fdefLeft = new FixtureDef();
                     fdefLeft.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
                     EdgeShape head = new EdgeShape();
-                    head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
+                    head.set(-9f / GameLogic.PPM, 0 / GameLogic.PPM, -9f / GameLogic.PPM, 9 / GameLogic.PPM);
                     fdefLeft.shape = head;
                     fdefLeft.isSensor = true;
                     b2Body.createFixture(fdefLeft).setUserData(this);
+
                 }
+                region = hitAnimation.getKeyFrame(stateTime);
                 if(hitAnimation.isAnimationFinished(stateTime) && b2Body.getFixtureList().size >= 2){
+                    Gdx.app.log("meele", "attack  " + stateTime);
+                    coolDown = 150;
+                    stateTime = 0;
                     while (b2Body.getFixtureList().size > 1) {
                         b2Body.destroyFixture(b2Body.getFixtureList().get(1));
                     }
                     isHitting = false;
-                    coolDown = 15;
                 }
                 break;
             case RUNNING:
@@ -125,12 +119,13 @@ public class MillyEnemy extends Enemy{
                 GameLogic.PROJECTILE_BIT |
                 GameLogic.PLAYER_ATTACK_BIT |
                 GameLogic.PLAYER_BIT |
-                GameLogic.OBJECT_BIT;
+                GameLogic.TYRANNOSAUR_BIT |
+                GameLogic.ENEMY_STOPPER;
         fdef.shape = shape;
         b2Body.createFixture(fdef).setUserData(this);
 
     }
-
+    @Override
     public void draw(Batch batch){
         if(!destroyed||stateTime<1 ){
             super.draw(batch);
@@ -140,18 +135,19 @@ public class MillyEnemy extends Enemy{
     @Override
     public void update(float deltaTime) {
         if(setToDestroy && !destroyed){
-            world.destroyBody(b2Body);
             destroyed = true;
             setBounds(getX(), getY(), 16 / GameLogic.PPM, 8 / GameLogic.PPM);
             stateTime = 0;
             screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y),
-                    Heart.class));
+                    Heart.class, runningRight));
+            world.destroyBody(b2Body);
         }
         else if (!destroyed){
             setRegion(getFrame(deltaTime));
             setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
             b2Body.setLinearVelocity(velocity);
         }
+        else stateTime += deltaTime;
     }
 
 

@@ -16,41 +16,94 @@ public class Archeopteryx extends Form{
     public Archeopteryx(Level screen, Player player){
         super(screen, "Archeopteryx", player);
         this.type = "Archeopteryx";
-        for (int i = 0; i <= 5; i ++){
-            if (i <= 2) frames.add(new TextureRegion(getTexture(), 479 + (i * 64), 225 + 431, 60, 30));
-            else frames.add(new TextureRegion(getTexture(), 479 + ((i - 3) * 64), 225 + 466, 60, 30));
-        }
+        walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20, 85, 60, 30));
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20 + 60 + 20, 85, 60, 30));
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20 + 60 + 20 + 55 + 20, 85, 60, 30));
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20 + 60 + 20 + 55 + 20 + 56 + 20 , 85, 60, 30));
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20 + 60 + 20 + 55 + 20 + 56 + 20 + 60 + 20, 85, 60, 30));
+        frames.add(new TextureRegion(getTexture(), 3840 + 57 + 20 + 60 + 20 + 55 + 20 + 56 + 20 + 60 + 20, 85, 60, 30));
+
         runAnimation = new Animation<>(0.1f, frames);
         frames.clear();
 
 
-        frames.add(new TextureRegion(getTexture(), 479, 225 + 290, 57, 30));
-        frames.add(new TextureRegion(getTexture(), 479 + 65, 225 + 293, 53, 24));
-
+        frames.add(new TextureRegion(getTexture(), 4302, 84, 57, 30));
+        frames.add(new TextureRegion(getTexture(), 4378, 87, 53, 24));
         jumpAnimation = new Animation<>(1.3f, frames);
         frames.clear();
-// change animation
-        for(int i = 0; i < 7; i++){
-            if(i <= 3) frames.add(new TextureRegion(getTexture(),479  + i * 51, 225 + 191, 53, 25));
-            else frames.add(new TextureRegion(getTexture(), 479 + (i - 3) * 51, 225 + 225, 51, 30));
-        }
-        hitAnimation = new Animation<>(0.1f, frames);
+
+        frames.add(new TextureRegion(getTexture(),4593 - 71, 81, 50, 30));
+        frames.add(new TextureRegion(getTexture(),4593, 78, 51, 33));
+        frames.add(new TextureRegion(getTexture(),4593 + 72, 79, 48, 33));
+        hitAnimation = new Animation<>(0.2f, frames);
         frames.clear();
 
-        standTexture = new TextureRegion(getTexture(), 479, 225, 63, 30);
+        standTexture = new TextureRegion(getTexture(), 3757, 83, 63, 30);
+        frames.clear();
 
-        for(int i = 0; i < 5; i++){
-            if(i <= 2) frames.add(new TextureRegion(getTexture(),478  + i *55 , 593, 49, 30));
-            else frames.add(new TextureRegion(getTexture(),478  + (i-2) *42, 630, 49, 30));
-        }
+        frames.add(new TextureRegion(getTexture(),4731, 83, 49, 30));
+        frames.add(new TextureRegion(getTexture(),4731 + 69, 87, 46, 25));
+        frames.add(new TextureRegion(getTexture(),4731 + 69 + 66, 90, 42, 21));
+        frames.add(new TextureRegion(getTexture(),4731 + 69 + 65 + 62, 95, 38, 25));
+        frames.add(new TextureRegion(getTexture(),4731 + 69 + 65 + 62 + 58, 102, 38, 10));
+        frames.add(new TextureRegion(getTexture(),4731 + 69 + 65 + 62 + 58 + 58, 102, 38, 10));
         deadAnimation = new Animation<>(0.5f, frames);
         frames.clear();
-        velocityX = 300 / GameLogic.PPM;
+
+
+        velocityX = 400 / GameLogic.PPM;
         jumpHeight = 450 / GameLogic.PPM;
+        damage = 1;
         currentFormHealth = 2;
+
     }
-
-
+    public void define(){
+        walking.play(0.5f, 10, 10);
+        walking.loop();
+        setBounds(player.b2Body.getPosition().x, player.b2Body.getPosition().y, 18 / GameLogic.PPM, 16 / GameLogic.PPM);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(6 / GameLogic.PPM, 6 / GameLogic.PPM);
+        FixtureDef fdef = new FixtureDef();
+        fdef.filter.categoryBits = GameLogic.PLAYER_BIT;
+        fdef.filter.maskBits = GameLogic.GROUND_BIT |
+                GameLogic.STONE_WALL |
+                GameLogic.ENEMY_BIT |
+                GameLogic.ENEMY_ATTACK_BIT |
+                GameLogic.PROJECTILE_BIT |
+                GameLogic.SMALL_ENEMY_BIT |
+                GameLogic.WATER_BIT |
+                GameLogic.ITEM_BIT;
+        fdef.shape = shape;
+        this.player.b2Body.createFixture(fdef).setUserData(player);
+        destroyed = false;
+    }
+    public Form.State getState(){
+        if(isDead){
+            return State.DEAD;
+        }
+        else if(runChangeAnimation){
+            return State.CHANGING;
+        }
+        else if (isHitting || Gdx.input.justTouched()){
+            isHitting = true;
+            return State.HITTING;
+        }
+        else if (player.b2Body.getLinearVelocity().y > 0)
+            return State.JUMPING;
+        else if (isFlying){
+            return State.FLYING;
+        }
+        else if (player.b2Body.getLinearVelocity().y < 0)
+            return Form.State.FALLING;
+        else if (player.b2Body.getLinearVelocity().x != 0)
+            return Form.State.RUNNING;
+        else
+            return Form.State.STANDING;
+    }
+    public void fly(){
+        isFlying = true;
+    }
     public TextureRegion getFrame(float deltaTime){
         currentState = getState();
         TextureRegion region;
@@ -59,20 +112,30 @@ public class Archeopteryx extends Form{
                 region = deadAnimation.getKeyFrame(stateTimer);
                 break;
             case CHANGING:
-                region = changeForm.getKeyFrame(stateTimer);
-                if (changeForm.isAnimationFinished(stateTimer)){
+                region = changeForm;
+                if (stateTimer > 1){
                     runChangeAnimation = false;
+                    coolDown = 3;
                 }
                 break;
             case JUMPING:
                 region = jumpAnimation.getKeyFrame(stateTimer);
-                player.ableToJump(false);
                 break;
             case RUNNING:
                 region = runAnimation.getKeyFrame(stateTimer, true);
                 break;
             case HITTING:
                 region = hitAnimation.getKeyFrame(stateTimer);
+                if(runningRight){
+                    setAttackFixture(8, 6);
+                }
+                else{
+                    setAttackFixture(-8, 6);
+                }
+                if(hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 3){
+                    destroyFixtures(2);
+                    isHitting = false;
+                }
                 break;
             case FLYING:
                 region = jumpAnimation.getKeyFrame(stateTimer);
@@ -97,103 +160,5 @@ public class Archeopteryx extends Form{
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
         previousState = currentState;
         return region;
-    }
-
-    public void setRightFixture(){
-        if (player.b2Body.getFixtureList().size >= 2){
-            while (player.b2Body.getFixtureList().size > 1) {
-                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
-            }
-        }
-        FixtureDef fdefRight = new FixtureDef();
-        fdefRight.filter.categoryBits = GameLogic.PLAYER_ATTACK_BIT;
-        fdefRight.filter.maskBits = GameLogic.GROUND_BIT |
-                GameLogic.STONE_WALL |
-                GameLogic.ENEMY_BIT |
-                GameLogic.SMALL_ENEMY_BIT |
-                GameLogic.OBJECT_BIT |
-                GameLogic.SMALL_ENEMY_HEAD_BIT;
-
-        EdgeShape head = new EdgeShape();
-        head.set(32 / GameLogic.PPM, 0 / GameLogic.PPM, 32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefRight.shape = head;
-        fdefRight.isSensor = true;
-        player.b2Body.createFixture(fdefRight).setUserData(player);
-    }
-    public void setLeftFixture(){
-        if (player.b2Body.getFixtureList().size >= 2){
-            while (player.b2Body.getFixtureList().size > 1) {
-                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
-            }
-        }
-        FixtureDef fdefLeft = new FixtureDef();
-        fdefLeft.filter.categoryBits = GameLogic.PLAYER_ATTACK_BIT;
-        fdefLeft.filter.maskBits = GameLogic.GROUND_BIT |
-                GameLogic.STONE_WALL |
-                GameLogic.ENEMY_BIT |
-                GameLogic.OBJECT_BIT;
-        EdgeShape head = new EdgeShape();
-        head.set(-32 / GameLogic.PPM, 0 / GameLogic.PPM, -32 / GameLogic.PPM, 9 / GameLogic.PPM);
-        fdefLeft.shape = head;
-        fdefLeft.isSensor = true;
-        player.b2Body.createFixture(fdefLeft).setUserData(player);
-    }
-    public Form.State getState(){
-        if(isDead){
-            return State.DEAD;
-        }
-        else if(runChangeAnimation){
-            return State.CHANGING;
-        }
-        else if (player.b2Body.getLinearVelocity().y > 0)
-            return State.JUMPING;
-        else if (isFlying){
-            return State.FLYING;
-        }
-        else if (player.b2Body.getLinearVelocity().y < 0)
-            return Form.State.FALLING;
-        else if (player.b2Body.getLinearVelocity().x != 0)
-            return Form.State.RUNNING;
-        else if (Gdx.input.isTouched()){
-            return Form.State.HITTING;
-        }
-        else
-            return Form.State.STANDING;
-    }
-    public void fly(){
-        isFlying = true;
-    }
-    public void setRightTriceFixture(){
-        /* add head later*/
-    }
-    public void setLeftTriceFixture(){
-        /* add head later*/
-    }
-    public void define(){
-        if (player.b2Body.getFixtureList().size >= 2){
-            while (player.b2Body.getFixtureList().size > 1) {
-                player.b2Body.destroyFixture(player.b2Body.getFixtureList().get(1));
-            }
-        }
-        walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
-        walking.play(0.5f, 10, 10);
-        walking.loop();
-        setBounds(player.b2Body.getPosition().x, player.b2Body.getPosition().y, 18 / GameLogic.PPM, 16 / GameLogic.PPM);
-        setRegion(standTexture);
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox(6 / GameLogic.PPM, 6 / GameLogic.PPM);
-        FixtureDef fdef = new FixtureDef();
-        fdef.filter.categoryBits = GameLogic.PLAYER_BIT;
-        fdef.filter.maskBits = GameLogic.GROUND_BIT |
-                GameLogic.STONE_WALL |
-                GameLogic.SMALL_ENEMY_BIT |
-                GameLogic.ENEMY_BIT |
-                GameLogic.OBJECT_BIT |
-                GameLogic.PROJECTILE_BIT |
-                GameLogic.WATER_BIT |
-                GameLogic.ITEM_BIT;
-        fdef.shape = shape;
-        this.player.b2Body.createFixture(fdef).setUserData(player);
-        destroyed = false;
     }
 }

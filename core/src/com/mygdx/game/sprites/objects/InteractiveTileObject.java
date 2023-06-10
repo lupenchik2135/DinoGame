@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
-import com.mygdx.game.screens.LevelOne;
 import com.mygdx.game.sprites.playable.Player;
 
 public abstract class InteractiveTileObject {

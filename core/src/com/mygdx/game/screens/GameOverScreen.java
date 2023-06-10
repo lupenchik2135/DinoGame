@@ -7,14 +7,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -28,7 +25,7 @@ public class GameOverScreen implements Screen {
     public GameOverScreen(final Game game){
         this.game = game;
         viewport = new FitViewport(GameLogic.V_WIDTH, GameLogic.V_HEIGHT, new OrthographicCamera());
-        stage = new Stage(viewport, ((GameLogic) game).batch);
+        stage = new Stage(viewport, ((GameLogic) game).getBatch());
         Gdx.input.setInputProcessor(stage);
         Label.LabelStyle font = new Label.LabelStyle(new BitmapFont(), Color.BLUE);
 
@@ -47,7 +44,7 @@ public class GameOverScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 // закрытие текущего экрана
-                game.setScreen(new MainMenu((GameLogic) game));
+                game.setScreen(new MainMenu(game));
                 dispose();
             }
         });
@@ -61,7 +58,7 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void show() {
-
+        /* not for use */
     }
 
     @Override
@@ -74,22 +71,22 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        /* not for use */
     }
 
     @Override
     public void pause() {
-
+        /* not for use */
     }
 
     @Override
     public void resume() {
-
+        /* not for use */
     }
 
     @Override
     public void hide() {
-
+        /* not for use */
     }
 
     @Override

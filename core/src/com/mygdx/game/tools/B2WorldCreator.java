@@ -1,10 +1,7 @@
 package com.mygdx.game.tools;
 
-import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
@@ -13,7 +10,8 @@ import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.enemies.DistantEnemy;
 import com.mygdx.game.sprites.enemies.MillyEnemy;
 import com.mygdx.game.sprites.enemies.SmallEnemy;
-import com.mygdx.game.sprites.objects.Mud;
+import com.mygdx.game.sprites.enemies.Worm;
+import com.mygdx.game.sprites.objects.EnemyStopper;
 import com.mygdx.game.sprites.objects.StoneWall;
 import com.mygdx.game.sprites.objects.Water;
 
@@ -21,6 +19,7 @@ public class B2WorldCreator {
     private final Array<SmallEnemy> smallEnemies;
     private final Array<MillyEnemy> millyEnemies;
     private final Array<DistantEnemy> distantEnemies;
+    private final Worm worm;
     public B2WorldCreator(Level screen){
         World world = screen.getWorld();
         TiledMap tiledMap = screen.getMap();
@@ -50,7 +49,7 @@ public class B2WorldCreator {
         //create mud
         for (RectangleMapObject object : tiledMap.getLayers().get(4).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = object.getRectangle();
-            new Mud(screen, rect);
+            new EnemyStopper(screen, rect);
         }
         //create warriors
         smallEnemies = new Array<>();
@@ -68,11 +67,12 @@ public class B2WorldCreator {
             Rectangle rect = object.getRectangle();
             distantEnemies.add(new DistantEnemy(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM));
         }
-        //добавить воду
         for (RectangleMapObject object : tiledMap.getLayers().get(8).getObjects().getByType(RectangleMapObject.class)){
             Rectangle rect = object.getRectangle();
             new Water(screen, rect);
         }
+            Rectangle rect = tiledMap.getLayers().get(9).getObjects().getByType(RectangleMapObject.class).get(0).getRectangle();
+            worm = new Worm(screen, rect.getX() / GameLogic.PPM, rect.getY() / GameLogic.PPM);
     }
 
     public Array<SmallEnemy> getSmallEnemies() {
@@ -83,5 +83,8 @@ public class B2WorldCreator {
     }
     public Array<DistantEnemy> getDistantEnemies() {
         return distantEnemies;
+    }
+    public Worm getWorm() {
+        return worm;
     }
 }

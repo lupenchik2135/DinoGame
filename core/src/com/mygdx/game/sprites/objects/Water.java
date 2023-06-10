@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
-import com.mygdx.game.screens.LevelOne;
 
 
 public class Water {
@@ -39,10 +38,11 @@ public class Water {
         fdef.shape = shape;
         fdef.isSensor = true;
         fixture = body.createFixture(fdef);
-
+        fixture.setDensity(0.1f);
         fixture.setUserData(this);
         Filter filter = new Filter();
         filter.categoryBits = GameLogic.WATER_BIT;
+        filter.maskBits = GameLogic.PLAYER_BIT;
         fixture.setFilterData(filter);
     }
 }

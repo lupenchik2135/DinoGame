@@ -2,12 +2,15 @@ package com.mygdx.game.sprites.playable;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.playable.forms.*;
 
+import java.util.Comparator;
 import java.util.Objects;
+import java.util.Vector;
 
 public class Player {
     private World world;
@@ -19,16 +22,34 @@ public class Player {
     private int lostHealth;
     private boolean getHit;
     private boolean getHeal;
-    private boolean isPlayerDead;
+    private boolean isAbleToChange;
     private boolean isAbleToJump;
-
-    public Player(Level screen) {
+    private boolean isDead;
+    private boolean timeToDefineForm;
+    public Player(Level screen, float x, float y) {
         this.world = screen.getWorld();
-        this.forms = new Form[4];
+        this.forms = new Form[5];
         BodyDef bdef = new BodyDef();
-        bdef.position.set(16 / GameLogic.PPM, 32 / GameLogic.PPM);
+        bdef.position.set(x / GameLogic.PPM, y  / GameLogic.PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
         this.b2Body = world.createBody(bdef);
+        PolygonShape shape = new PolygonShape();
+        Vector2[] verticies = new Vector2[4];
+        verticies[0] = new Vector2(-32 / GameLogic.PPM, 0 / GameLogic.PPM);
+        verticies[1] = new Vector2(-32 / GameLogic.PPM, 42 / GameLogic.PPM);
+        verticies[2] = new Vector2(32 / GameLogic.PPM, 42 / GameLogic.PPM);
+        verticies[3] = new Vector2(32 / GameLogic.PPM, 0 / GameLogic.PPM);
+        shape.set(verticies);
+        FixtureDef fdef = new FixtureDef();
+        fdef.filter.categoryBits = GameLogic.CHECK_BIT;
+        fdef.filter.maskBits = GameLogic.STONE_WALL |
+                GameLogic.GROUND_BIT|
+                GameLogic.WATER_BIT;
+        fdef.shape = shape;
+        fdef.isSensor = true;
+        if (b2Body != null){
+            b2Body.createFixture(fdef).setUserData(this);
+        }
         this.currentForm = 0;
         this.previousForm = 0;
         this.health = 3;
@@ -37,9 +58,10 @@ public class Player {
             forms[1] = new Triceratops(screen, this);
             forms[2] = new Ichtiozaur(screen, this);
             forms[3] = new Archeopteryx(screen, this);
+            forms[4] = new Tyrannosaur(screen, this);
         }
         forms[currentForm].define();
-        isPlayerDead = false;
+        isAbleToChange = true;
 
     }
     public void swim(){
@@ -47,6 +69,7 @@ public class Player {
             forms[currentForm].die();
         }else {
             ((Ichtiozaur) forms[currentForm]).setSwimming(true);
+            world.setGravity(new Vector2(0, GameLogic.WATER_GRAVITY));
         }
     }
 
@@ -57,34 +80,37 @@ public class Player {
     }
 
     public void update(float deltaTime) {
-        if (currentForm == previousForm) {
-            forms[currentForm].update(deltaTime);
-            if (getHit) {
-                health -= 1;
-                lostHealth += 1;
-                if (health > 0) {
-                    getHit = false;
-                } else {
-                    Gdx.app.log("dead", "player");
-                    isPlayerDead = forms[currentForm].die();
-                    getHit = false;
-                    Gdx.app.log("player hp", " " + health);
+            if (!timeToDefineForm) {
+                forms[currentForm].update(deltaTime);
+                if(!isDead){
+                    ableToJump();
+                    if (getHit) {
+                        health -= 1;
+                        lostHealth += 1;
+                        if (health > 0) {
+                            getHit = false;
+                        } else {
+                            isDead = true;
+                            forms[currentForm].die();
+                        }
+                    }
+                    if (getHeal) {
+                        health += 1;
+                        lostHealth -= 1;
+                        getHeal = false;
+                    }
+                }
+            } else {
+                if (currentForm != previousForm) {
+                    forms[previousForm].destroy();
+                    previousForm = currentForm;
+                    forms[currentForm].change();
+                    timeToDefineForm = false;
                 }
             }
-            if (getHeal) {
-                health += 1;
-                lostHealth -= 1;
-                getHeal = false;
-            }
-        } else {
-            forms[previousForm].destroy();
-            previousForm = currentForm;
-            forms[currentForm].change();
         }
-    }
 
     public void getHitted() {
-        Gdx.app.log("player hp", " " + health);
         getHit = true;
     }
 
@@ -93,9 +119,14 @@ public class Player {
             getHeal = true;
         }
     }
-
-    public void ableToJump(boolean ability){
-        isAbleToJump = ability;
+    public boolean getIsAbleToChange() {
+        return isAbleToChange;
+    }
+    public void ableToJump(){
+        isAbleToJump = !(getState() == Form.State.JUMPING || getState() == Form.State.FLYING || getState() == Form.State.FALLING || getState() == Form.State.SWIMMING);
+    }
+    public void isAbleToChange(boolean changeState){
+        isAbleToChange = changeState;
     }
 
     public boolean getIsAbleToJump(){
@@ -117,8 +148,11 @@ public class Player {
         return forms[currentForm];
     }
 
-    public void setCurrentForm(int currentForm) {
-        this.currentForm = currentForm;
+    public void changeInto(int currentForm) {
+        if(isAbleToChange) {
+            timeToDefineForm = true;
+            this.currentForm = currentForm;
+        }
     }
 
     public void dispose() {
@@ -137,9 +171,6 @@ public class Player {
 
     public void setHealth(int health) {
         this.health = health;
-    }
-    public boolean isPlayerDead() {
-        return isPlayerDead;
     }
 
     public float getStateTimer(){

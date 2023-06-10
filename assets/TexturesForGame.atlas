@@ -1,0 +1,55 @@
+
+TexturesForGame.png
+size: 8192, 128
+format: RGBA8888
+filter: Nearest, Nearest
+repeat: none
+Archeopteryx
+  rotate: false
+  xy: 3757, 78
+  size: 1321, 34
+  orig: 1321, 34
+  offset: 0, 0
+  index: -1
+Human
+  rotate: false
+  xy: 5080, 78
+  size: 1082, 34
+  orig: 1082, 34
+  offset: 0, 0
+  index: -1
+Ichtiosaur
+  rotate: false
+  xy: 2, 68
+  size: 2351, 44
+  orig: 2351, 44
+  offset: 0, 0
+  index: -1
+Mobs
+  rotate: false
+  xy: 3757, 42
+  size: 1279, 34
+  orig: 1279, 34
+  offset: 0, 0
+  index: -1
+Projectiles
+  rotate: false
+  xy: 2, 2
+  size: 58, 16
+  orig: 58, 16
+  offset: 0, 0
+  index: -1
+Triceratops
+  rotate: false
+  xy: 2, 20
+  size: 1718, 46
+  orig: 1718, 46
+  offset: 0, 0
+  index: -1
+Tyrannosaur
+  rotate: false
+  xy: 2355, 17
+  size: 1400, 95
+  orig: 1400, 95
+  offset: 0, 0
+  index: -1

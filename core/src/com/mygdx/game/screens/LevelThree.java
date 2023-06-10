@@ -1,6 +1,7 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
@@ -10,7 +11,8 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.GameLogic;
@@ -20,8 +22,8 @@ import com.mygdx.game.sprites.enemies.Worm;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.items.Item;
 import com.mygdx.game.sprites.objects.ObjectDef;
-import com.mygdx.game.sprites.playable.forms.Form;
 import com.mygdx.game.sprites.playable.Player;
+import com.mygdx.game.sprites.playable.forms.Form;
 import com.mygdx.game.sprites.projectiles.Arrow;
 import com.mygdx.game.sprites.projectiles.Projectile;
 import com.mygdx.game.sprites.projectiles.Spit;
@@ -31,9 +33,9 @@ import com.mygdx.game.tools.WorldContactListener;
 import java.util.Objects;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class LevelOne extends Level {
-    public LevelOne(GameLogic game){
-        super(game, "SwampMap.tmx");
+public class LevelThree extends Level {
+    public LevelThree(GameLogic game){
+        super(game, "CaveMap.tmx");
     }
     public void spawnObject(ObjectDef objectDef){
         objectsToSpawn.add(objectDef);
@@ -80,7 +82,7 @@ public class LevelOne extends Level {
             if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
                 enemy.getB2Body().setActive(true);
             }
-            if(enemy.getX() < player.getX() + (12 / GameLogic.PPM) || enemy.getX() > enemy.getX() - player.getX() - (12 / GameLogic.PPM)){
+            if(enemy.getX() < player.getX() + (12 / GameLogic.PPM)|| enemy.getX() > player.getX() - (12 / GameLogic.PPM)){
                 enemy.hit();
             }
         }
