@@ -54,8 +54,6 @@ public abstract class Form extends Sprite {
     protected int damage;
 
 
-
-
     protected Form(Level screen, String regionName, Player player) {
         super(screen.getAtlas().findRegion(regionName));
         this.player = player;
@@ -85,11 +83,12 @@ public abstract class Form extends Sprite {
         // check on 0 hp
         player.setHealth(healthmath <= 0 ? 1 : healthmath);
     }
-    public boolean die(){
+
+    public boolean die() {
         isDead = true;
         Filter filter = new Filter();
         filter.maskBits = GameLogic.GROUND_BIT;
-        for (Fixture fixture: player.b2Body.getFixtureList()){
+        for (Fixture fixture : player.b2Body.getFixtureList()) {
             fixture.setFilterData(filter);
         }
         player.b2Body.applyLinearImpulse(new Vector2(0, 4f), player.b2Body.getWorldCenter(), true);
@@ -101,7 +100,8 @@ public abstract class Form extends Sprite {
     public abstract void define();
 
     protected abstract TextureRegion getFrame(float deltaTime);
-    protected void setAttackFixture(float x, float y){
+
+    protected void setAttackFixture(float x, float y) {
         FixtureDef fdef = new FixtureDef();
         fdef.filter.categoryBits = GameLogic.PLAYER_ATTACK_BIT;
         EdgeShape head = new EdgeShape();
@@ -110,28 +110,31 @@ public abstract class Form extends Sprite {
         fdef.isSensor = true;
         player.b2Body.createFixture(fdef).setUserData(player);
     }
+
     public void update(float deltaTime) {
         if (!destroyed) {
             setPosition(player.b2Body.getPosition().x - getWidth() / 2, player.b2Body.getPosition().y - getHeight() / 2);
-            if (currentState == State.RUNNING) {
-                walking.resume();
-            } else {
-                walking.pause();
-                walking.dispose();
+            if (walking != null) {
+                if (currentState == State.RUNNING) {
+                    walking.resume();
+                } else {
+                    walking.pause();
+                    walking.dispose();
+                }
             }
-                setRegion(getFrame(deltaTime));
+            setRegion(getFrame(deltaTime));
         }
         if (timeToDefineForm) {
             this.define();
             timeToDefineForm = false;
         }
-        if(coolDown > 0){
+        if (coolDown > 0) {
             coolDown -= 1;
         }
-        if(Objects.equals(this.type, "Tyrannosaur")){
+        if (Objects.equals(this.type, "Tyrannosaur")) {
             ((Tyrannosaur) this).countTime();
         }
-        if(Objects.equals(this.type, "Archeopteryx") && Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+        if (Objects.equals(this.type, "Archeopteryx") && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
             ((Archeopteryx) this).fly();
         }
     }
@@ -139,6 +142,7 @@ public abstract class Form extends Sprite {
     public String getType() {
         return type;
     }
+
     public int getDamage() {
         return damage;
     }
@@ -158,7 +162,7 @@ public abstract class Form extends Sprite {
     public void destroy() {
         destroyed = true;
         destroyFixtures(1);
-        if(walking != null){
+        if (walking != null) {
             walking.pause();
         }
     }
@@ -171,12 +175,14 @@ public abstract class Form extends Sprite {
         }
     }
 
-    public float getVelocityX(){
+    public float getVelocityX() {
         return velocityX;
     }
-    public float getJumpHeight(){
+
+    public float getJumpHeight() {
         return jumpHeight;
     }
+
     public void dispose() {
         if (walking != null) {
             walking.dispose();

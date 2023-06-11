@@ -5,7 +5,7 @@ import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.playable.Player;
 
-public class EnemyStopper extends InteractiveTileObject{
+public class EnemyStopper extends InteractiveTileObject {
     public EnemyStopper(Level screen, Rectangle bounds) {
         super(screen, bounds);
         fixture.setUserData(this);

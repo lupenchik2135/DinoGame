@@ -14,7 +14,7 @@ import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.objects.ObjectDef;
 import com.mygdx.game.sprites.projectiles.Arrow;
 
-public class DistantEnemy extends Enemy{
+public class DistantEnemy extends Enemy {
     private Animation<TextureRegion> walkAnimation;
 
     private boolean runningRight;
@@ -36,24 +36,26 @@ public class DistantEnemy extends Enemy{
         destroyed = false;
         health = 10;
     }
-    public State getState(){
-        if (isHitting){
+
+    public State getState() {
+        if (isHitting) {
             return State.HITTING;
         }
         return State.RUNNING;
     }
-    public TextureRegion getFrame(float deltaTime){
+
+    public TextureRegion getFrame(float deltaTime) {
         currentState = getState();
         TextureRegion region;
-        switch (currentState){
+        switch (currentState) {
             case HITTING:
                 region = walkAnimation.getKeyFrame(stateTime, true);
-                if(runningRight){
-                    screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y),
+                if (runningRight) {
+                    screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x + 16 / GameLogic.PPM, b2Body.getPosition().y),
                             Arrow.class, runningRight));
                     coolDown = 150;
                     isHitting = false;
-                }else{
+                } else {
                     screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x - 16 / GameLogic.PPM, b2Body.getPosition().y),
                             Arrow.class, runningRight));
                     coolDown = 150;
@@ -65,11 +67,10 @@ public class DistantEnemy extends Enemy{
                 region = walkAnimation.getKeyFrame(stateTime, true);
                 break;
         }
-        if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
+        if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()) {
             region.flip(true, false);
             runningRight = false;
-        }
-        else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
+        } else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())) {
             region.flip(true, false);
             runningRight = true;
         }
@@ -77,6 +78,7 @@ public class DistantEnemy extends Enemy{
         previousState = currentState;
         return region;
     }
+
     @Override
     protected void defineEnemy() {
         BodyDef bdef = new BodyDef();
@@ -101,29 +103,28 @@ public class DistantEnemy extends Enemy{
         b2Body.createFixture(fdef).setUserData(this);
 
     }
+
     @Override
-    public void draw(Batch batch){
-        if(!destroyed || stateTime<1 ){
+    public void draw(Batch batch) {
+        if (!destroyed || stateTime < 1) {
             super.draw(batch);
         }
     }
 
     @Override
     public void update(float deltaTime) {
-        if(setToDestroy && !destroyed){
+        if (setToDestroy && !destroyed) {
             destroyed = true;
             setBounds(getX(), getY(), 16 / GameLogic.PPM, 8 / GameLogic.PPM);
             stateTime = 0;
-            screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y),
+            screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x + 16 / GameLogic.PPM, b2Body.getPosition().y),
                     Heart.class, runningRight));
             world.destroyBody(b2Body);
-        }
-        else if (!destroyed){
+        } else if (!destroyed) {
             setRegion(getFrame(deltaTime));
             setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
             b2Body.setLinearVelocity(velocity);
-        }
-        else stateTime += deltaTime;
+        } else stateTime += deltaTime;
     }
 
 

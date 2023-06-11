@@ -9,7 +9,6 @@ public class GameLogic extends Game {
 	public static final int V_WIDTH = 400;
 	public static final int V_HEIGHT = 208;
 	public static final float PPM = 100;
-	public static final short DEAD_BIT = 0;
 
 	public static final short GROUND_BIT = 1;
 	public static final short PLAYER_BIT = 2;
@@ -29,24 +28,20 @@ public class GameLogic extends Game {
 	public static final float GRAVITY = -9.8f;
 	public static final float WATER_GRAVITY = 0f;
 
-	
+
 	@Override
-	public void create () {
+	public void create() {
 		batch = new SpriteBatch();
 
 		setScreen(new MainMenu(this));
 	}
 
-	@Override
-	public void render () {
-		super.render();
-	}
 	public SpriteBatch getBatch() {
 		return batch;
 	}
 
 	@Override
-	public void dispose () {
+	public void dispose() {
 		batch.dispose();
 	}
 }

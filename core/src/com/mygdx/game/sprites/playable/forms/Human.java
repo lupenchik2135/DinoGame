@@ -1,28 +1,25 @@
 package com.mygdx.game.sprites.playable.forms;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.EdgeShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.playable.Player;
 
-public class Human extends Form{
-    public Human(Level screen, Player player){
+public class Human extends Form {
+    public Human(Level screen, Player player) {
         super(screen, "Human", player);
         this.type = "Human";
 
-        frames.add(new TextureRegion(getTexture(),5126, 80, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5163, 80, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5198, 78, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5232, 80, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5278, 80, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5314, 78, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5126, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5163, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5198, 78, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5232, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5278, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5314, 78, 27, 34));
 
         runAnimation = new Animation<>(0.2f, frames);
         frames.clear();
@@ -38,8 +35,8 @@ public class Human extends Form{
         jumpAnimation = new Animation<>(0.1f, frames);
         frames.clear();
         // change animation
-        frames.add(new TextureRegion(getTexture(),5665 , 80, 27, 34));
-        frames.add(new TextureRegion(getTexture(),5711, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5665, 80, 27, 34));
+        frames.add(new TextureRegion(getTexture(), 5711, 80, 27, 34));
         frames.add(new TextureRegion(getTexture(), 5757, 80, 27, 34));
         frames.add(new TextureRegion(getTexture(), 5801, 80, 27, 34));
         frames.add(new TextureRegion(getTexture(), 5841, 80, 27, 34));
@@ -61,10 +58,8 @@ public class Human extends Form{
         damage = 2;
         currentFormHealth = 3;
     }
-    public void define(){
-        walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
-        walking.play(0.5f, 10, 10);
-        walking.loop();
+
+    public void define() {
         setBounds(player.b2Body.getPosition().x, player.b2Body.getPosition().y, 27 / GameLogic.PPM, 35 / GameLogic.PPM);
         PolygonShape shape = new PolygonShape();
         shape.setAsBox(10 / GameLogic.PPM, 14 / GameLogic.PPM);
@@ -80,24 +75,22 @@ public class Human extends Form{
                 GameLogic.WATER_BIT |
                 GameLogic.ITEM_BIT;
         fdef.shape = shape;
-        if (player.b2Body != null){
+        if (player.b2Body != null) {
             this.player.b2Body.createFixture(fdef).setUserData(player);
         }
         destroyed = false;
 
     }
-    public State getState(){
-        if(isDead){
+
+    public State getState() {
+        if (isDead) {
             return State.DEAD;
-        }
-        else if(runChangeAnimation){
+        } else if (runChangeAnimation) {
             return State.CHANGING;
-        }
-        else if (isHitting || Gdx.input.justTouched()){
+        } else if (isHitting || Gdx.input.justTouched()) {
             isHitting = true;
             return State.HITTING;
-        }
-        else if (player.b2Body.getLinearVelocity().y > 0 || (player.b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
+        } else if (player.b2Body.getLinearVelocity().y > 0 || (player.b2Body.getLinearVelocity().y < 0 && previousState == State.JUMPING))
             return State.JUMPING;
         else if (player.b2Body.getLinearVelocity().y < 0)
             return State.FALLING;
@@ -106,32 +99,29 @@ public class Human extends Form{
         else
             return State.STANDING;
     }
-    public TextureRegion getFrame(float deltaTime){
+
+    public TextureRegion getFrame(float deltaTime) {
         currentState = getState();
         TextureRegion region;
-        switch (currentState){
+        switch (currentState) {
             case DEAD:
                 region = deadAnimation.getKeyFrame(stateTimer);
                 break;
             case CHANGING:
                 region = changeForm;
-                if (stateTimer > 1){
-                    runChangeAnimation = false;
-                    coolDown = 3;
-                }
+                checkTime();
                 break;
             case RUNNING:
                 region = runAnimation.getKeyFrame(stateTimer, true);
                 break;
             case HITTING:
                 region = hitAnimation.getKeyFrame(stateTimer);
-                if(runningRight){
+                if (runningRight) {
                     setAttackFixture(14, 9);
-                }
-                else{
+                } else {
                     setAttackFixture(-14, 9);
                 }
-                if(hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 2){
+                if (hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 2) {
                     destroyFixtures(2);
                     isHitting = false;
                 }
@@ -145,16 +135,22 @@ public class Human extends Form{
                 region = standTexture;
                 break;
         }
-        if ((player.b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
+        if ((player.b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()) {
             region.flip(true, false);
             runningRight = false;
-        }
-        else if (((player.b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
+        } else if (((player.b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())) {
             region.flip(true, false);
             runningRight = true;
         }
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
         previousState = currentState;
         return region;
+    }
+
+    private void checkTime() {
+        if (stateTimer > 1) {
+            runChangeAnimation = false;
+            coolDown = 3;
+        }
     }
 }

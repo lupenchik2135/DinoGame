@@ -51,7 +51,8 @@ public abstract class Level implements Screen {
     protected Array<Projectile> projectiles;
     protected Worm worm;
     public LinkedBlockingQueue<ObjectDef> objectsToSpawn;
-    protected Level(GameLogic game, String level){
+
+    protected Level(GameLogic game, String level) {
         atlas = new TextureAtlas("TexturesForGame.atlas");
         this.game = game;
         gameCam = new OrthographicCamera();
@@ -59,7 +60,7 @@ public abstract class Level implements Screen {
         mapLoader = new TmxMapLoader();
         map = mapLoader.load(level);
         renderer = new OrthogonalTiledMapRenderer(map, 1 / GameLogic.PPM);
-        gameCam.position.set(gamePort.getWorldWidth()/2, gamePort.getWorldHeight()/2, 0);
+        gameCam.position.set(gamePort.getWorldWidth() / 2, gamePort.getWorldHeight() / 2, 0);
         world = new World(new Vector2(0, GameLogic.GRAVITY), true);
         b2dr = new Box2DDebugRenderer();
         creator = new B2WorldCreator(this);
@@ -74,20 +75,22 @@ public abstract class Level implements Screen {
         music.play();
         world.setContactListener(new WorldContactListener());
 
-        items = new Array<Item>();
-        projectiles = new Array<Projectile>();
+        items = new Array<>();
+        projectiles = new Array<>();
         objectsToSpawn = new LinkedBlockingQueue<>();
 
         worm = creator.getWorm();
     }
+
     public abstract void spawnObject(ObjectDef objectDef);
+
     public abstract void handleSpawningObjects();
 
     public abstract TextureAtlas getAtlas();
 
 
-    public void handleInput(){
-        if(!player.getCurrentForm().isChanging() && player.getState() != Form.State.DEAD && player.getState() != Form.State.SWIMMING){
+    public void handleInput() {
+        if (!player.getCurrentForm().isChanging() && player.getState() != Form.State.DEAD && player.getState() != Form.State.SWIMMING) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && player.getIsAbleToJump()) {
                 player.b2Body.applyLinearImpulse(new Vector2(0, player.getCurrentForm().getJumpHeight()), player.b2Body.getWorldCenter(), true);
             }
@@ -100,33 +103,41 @@ public abstract class Level implements Screen {
             if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -player.getCurrentForm().getVelocityX()) {
                 player.b2Body.applyLinearImpulse(new Vector2(-0.1f, 0), player.b2Body.getWorldCenter(), true);
             }
-            if(player.getIsAbleToChange()){
-                if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-                    player.changeInto(0);
-                }
-                if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-                    player.changeInto(1);
-                }
-                if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-                    player.changeInto(2);
-                }
-                if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
-                    player.changeInto(3);
-                }
-                if (hud.getUltimateTimer() == 0 && Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) {
-                    player.changeInto(4);
-                }
+            handleChanges();
+        }
+    }
+
+    private void handleChanges() {
+        if (player.getIsAbleToChange()) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
+                player.changeInto(0);
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+                player.changeInto(1);
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+                player.changeInto(2);
+            }
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
+                player.changeInto(3);
+            }
+            if (hud.getUltimateTimer() == 0 && Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) {
+                player.changeInto(4);
             }
         }
     }
+
     public abstract void update(float deltaTime);
+
     public abstract TiledMap getMap();
 
     public abstract World getWorld();
-    public boolean gameOver(){
+
+    public boolean gameOver() {
         return player.getState() == Form.State.DEAD && player.getStateTimer() > 3;
     }
-    public void setNewUltTimer(Integer time){
+
+    public void setNewUltTimer(Integer time) {
         hud.setUltimateTimer(time);
     }
 

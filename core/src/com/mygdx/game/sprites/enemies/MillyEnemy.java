@@ -15,9 +15,10 @@ import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.objects.ObjectDef;
 
-public class MillyEnemy extends Enemy{
+public class MillyEnemy extends Enemy {
     private Animation<TextureRegion> walkAnimation;
     private Animation<TextureRegion> hitAnimation;
+    private boolean isAbleToHit;
 
     private boolean runningRight;
 
@@ -43,57 +44,33 @@ public class MillyEnemy extends Enemy{
         setToDestroy = false;
         destroyed = false;
         health = 10;
+        isAbleToHit = true;
     }
-    public State getState(){
-        if (isHitting){
+
+    public State getState() {
+        if (isHitting || (isAbleToHit && coolDown == 0)) {
             return State.HITTING;
         }
         return State.RUNNING;
     }
-    public TextureRegion getFrame(float deltaTime){
+
+    public TextureRegion getFrame(float deltaTime) {
         currentState = getState();
         TextureRegion region;
-        switch (currentState){
+        switch (currentState) {
             case HITTING:
-                if(runningRight){
-                    FixtureDef fdefRight = new FixtureDef();
-                    fdefRight.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
-                    EdgeShape head = new EdgeShape();
-                    head.set(9f / GameLogic.PPM, 0 / GameLogic.PPM, 9f / GameLogic.PPM, 9 / GameLogic.PPM);
-                    fdefRight.shape = head;
-                    fdefRight.isSensor = true;
-                    b2Body.createFixture(fdefRight).setUserData(this);
-                }else{
-                    FixtureDef fdefLeft = new FixtureDef();
-                    fdefLeft.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
-                    EdgeShape head = new EdgeShape();
-                    head.set(-9f / GameLogic.PPM, 0 / GameLogic.PPM, -9f / GameLogic.PPM, 9 / GameLogic.PPM);
-                    fdefLeft.shape = head;
-                    fdefLeft.isSensor = true;
-                    b2Body.createFixture(fdefLeft).setUserData(this);
-
-                }
                 region = hitAnimation.getKeyFrame(stateTime);
-                if(hitAnimation.isAnimationFinished(stateTime) && b2Body.getFixtureList().size >= 2){
-                    Gdx.app.log("meele", "attack  " + stateTime);
-                    coolDown = 150;
-                    stateTime = 0;
-                    while (b2Body.getFixtureList().size > 1) {
-                        b2Body.destroyFixture(b2Body.getFixtureList().get(1));
-                    }
-                    isHitting = false;
-                }
+                checkRunAndAnimation();
                 break;
             case RUNNING:
             default:
                 region = walkAnimation.getKeyFrame(stateTime, true);
                 break;
         }
-        if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
+        if ((b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()) {
             region.flip(true, false);
             runningRight = false;
-        }
-        else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
+        } else if (((b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())) {
             region.flip(true, false);
             runningRight = true;
         }
@@ -101,6 +78,36 @@ public class MillyEnemy extends Enemy{
         previousState = currentState;
         return region;
     }
+
+    private void checkRunAndAnimation() {
+        if (runningRight) {
+            Gdx.app.log("Fefe", "frfefe");
+            FixtureDef fdefRight = new FixtureDef();
+            fdefRight.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
+            EdgeShape head = new EdgeShape();
+            head.set(9f / GameLogic.PPM, 0 / GameLogic.PPM, 9f / GameLogic.PPM, 9 / GameLogic.PPM);
+            fdefRight.shape = head;
+            fdefRight.isSensor = true;
+            b2Body.createFixture(fdefRight).setUserData(this);
+        } else {
+            FixtureDef fdefLeft = new FixtureDef();
+            fdefLeft.filter.categoryBits = GameLogic.ENEMY_ATTACK_BIT;
+            EdgeShape head = new EdgeShape();
+            head.set(-9f / GameLogic.PPM, 0 / GameLogic.PPM, -9f / GameLogic.PPM, 9 / GameLogic.PPM);
+            fdefLeft.shape = head;
+            fdefLeft.isSensor = true;
+            b2Body.createFixture(fdefLeft).setUserData(this);
+
+        }
+        if (hitAnimation.isAnimationFinished(stateTime) && b2Body.getFixtureList().size >= 2) {
+            while (b2Body.getFixtureList().size > 1) {
+                b2Body.destroyFixture(b2Body.getFixtureList().get(1));
+            }
+            isHitting = false;
+
+        }
+    }
+
     @Override
     protected void defineEnemy() {
         BodyDef bdef = new BodyDef();
@@ -125,29 +132,38 @@ public class MillyEnemy extends Enemy{
         b2Body.createFixture(fdef).setUserData(this);
 
     }
+
     @Override
-    public void draw(Batch batch){
-        if(!destroyed||stateTime<1 ){
+    public void hit() {
+        if (isAbleToHit) {
+            isHitting = true;
+            coolDown = 150;
+        } else {
+            coolDown -= 1;
+        }
+    }
+
+    @Override
+    public void draw(Batch batch) {
+        if (!destroyed || stateTime < 1) {
             super.draw(batch);
         }
     }
 
     @Override
     public void update(float deltaTime) {
-        if(setToDestroy && !destroyed){
+        if (setToDestroy && !destroyed) {
             destroyed = true;
             setBounds(getX(), getY(), 16 / GameLogic.PPM, 8 / GameLogic.PPM);
             stateTime = 0;
-            screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x+ 16 / GameLogic.PPM, b2Body.getPosition().y),
+            screen.spawnObject(new ObjectDef(new Vector2(b2Body.getPosition().x + 16 / GameLogic.PPM, b2Body.getPosition().y),
                     Heart.class, runningRight));
             world.destroyBody(b2Body);
-        }
-        else if (!destroyed){
+        } else if (!destroyed) {
             setRegion(getFrame(deltaTime));
             setPosition(b2Body.getPosition().x - getWidth() / 2, b2Body.getPosition().y - getHeight() / 2);
             b2Body.setLinearVelocity(velocity);
         }
-        else stateTime += deltaTime;
     }
 
 

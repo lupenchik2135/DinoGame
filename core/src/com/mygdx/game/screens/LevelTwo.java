@@ -1,35 +1,20 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.scenes.Hud;
 import com.mygdx.game.sprites.enemies.Enemy;
-import com.mygdx.game.sprites.enemies.Worm;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.items.Item;
 import com.mygdx.game.sprites.objects.ObjectDef;
 import com.mygdx.game.sprites.playable.forms.Form;
-import com.mygdx.game.sprites.playable.Player;
 import com.mygdx.game.sprites.projectiles.Arrow;
 import com.mygdx.game.sprites.projectiles.Projectile;
 import com.mygdx.game.sprites.projectiles.Spit;
-import com.mygdx.game.tools.B2WorldCreator;
-import com.mygdx.game.tools.WorldContactListener;
-
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class LevelTwo  extends Level{
     public LevelTwo(GameLogic game){
@@ -60,6 +45,37 @@ public class LevelTwo  extends Level{
         handleSpawningObjects();
         world.step(1/60f, 6, 2);
         player.update(deltaTime);
+        updateObjects(deltaTime);
+        if(player.b2Body.getPosition().x > GameLogic.V_WIDTH / GameLogic.PPM - player.b2Body.getPosition().x && player.b2Body.getPosition().x <= 36.4f && player.getState() != Form.State.DEAD) {
+            gameCam.position.x = player.b2Body.getPosition().x;
+        }
+        gameCam.update();
+        hud.update(deltaTime);
+        renderer.setView(gameCam);
+    }
+
+    private void updateObjects(float deltaTime) {
+        updateEnemies(deltaTime);
+        for (Item item : items){
+            item.update(deltaTime);
+        }
+        if(worm.getX() < player.getX() + (256 / GameLogic.PPM) && !worm.getB2Body().isActive()){
+            worm.update(deltaTime);
+            worm.getB2Body().setActive(true);
+            hud.setUltimateTimer(15);
+            if (Objects.equals(player.getCurrentForm().getType(), "Tyrannosaur")){
+                player.changeInto(0);
+            }
+        }
+        if(worm.getB2Body().isActive()){
+            worm.update(deltaTime);
+        }
+        for (Projectile projectile : projectiles){
+            projectile.update(deltaTime);
+        }
+    }
+
+    private void updateEnemies(float deltaTime) {
         for (Enemy enemy : creator.getSmallEnemies()){
             enemy.update(deltaTime);
             if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
@@ -84,30 +100,8 @@ public class LevelTwo  extends Level{
                 enemy.hit();
             }
         }
-        for (Item item : items){
-            item.update(deltaTime);
-        }
-        if(worm.getX() < player.getX() + (256 / GameLogic.PPM) && !worm.getB2Body().isActive()){
-            worm.update(deltaTime);
-            worm.getB2Body().setActive(true);
-            hud.setUltimateTimer(15);
-            if (Objects.equals(player.getCurrentForm().getType(), "Tyrannosaur")){
-                player.changeInto(0);
-            }
-        }
-        if(worm.getB2Body().isActive()){
-            worm.update(deltaTime);
-        }
-        for (Projectile projectile : projectiles){
-            projectile.update(deltaTime);
-        }
-        if(player.b2Body.getPosition().x > GameLogic.V_WIDTH / GameLogic.PPM - player.b2Body.getPosition().x && player.b2Body.getPosition().x <= 36.4f && player.getState() != Form.State.DEAD) {
-            gameCam.position.x = player.b2Body.getPosition().x;
-        }
-        gameCam.update();
-        hud.update(deltaTime);
-        renderer.setView(gameCam);
     }
+
     @Override
     public void show() {
         /* not to use */

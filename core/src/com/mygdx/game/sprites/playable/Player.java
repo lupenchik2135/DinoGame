@@ -1,16 +1,12 @@
 package com.mygdx.game.sprites.playable;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
 import com.mygdx.game.sprites.playable.forms.*;
-
-import java.util.Comparator;
 import java.util.Objects;
-import java.util.Vector;
 
 public class Player {
     private World world;
@@ -26,11 +22,12 @@ public class Player {
     private boolean isAbleToJump;
     private boolean isDead;
     private boolean timeToDefineForm;
+
     public Player(Level screen, float x, float y) {
         this.world = screen.getWorld();
         this.forms = new Form[5];
         BodyDef bdef = new BodyDef();
-        bdef.position.set(x / GameLogic.PPM, y  / GameLogic.PPM);
+        bdef.position.set(x / GameLogic.PPM, y / GameLogic.PPM);
         bdef.type = BodyDef.BodyType.DynamicBody;
         this.b2Body = world.createBody(bdef);
         PolygonShape shape = new PolygonShape();
@@ -43,11 +40,11 @@ public class Player {
         FixtureDef fdef = new FixtureDef();
         fdef.filter.categoryBits = GameLogic.CHECK_BIT;
         fdef.filter.maskBits = GameLogic.STONE_WALL |
-                GameLogic.GROUND_BIT|
+                GameLogic.GROUND_BIT |
                 GameLogic.WATER_BIT;
         fdef.shape = shape;
         fdef.isSensor = true;
-        if (b2Body != null){
+        if (b2Body != null) {
             b2Body.createFixture(fdef).setUserData(this);
         }
         this.currentForm = 0;
@@ -64,51 +61,56 @@ public class Player {
         isAbleToChange = true;
 
     }
-    public void swim(){
-        if(!Objects.equals(forms[currentForm].getType(), "Ichtiozaur")){
+
+    public void swim() {
+        if (!Objects.equals(forms[currentForm].getType(), "Ichtiozaur")) {
             forms[currentForm].die();
-        }else {
+        } else {
             ((Ichtiozaur) forms[currentForm]).setSwimming(true);
             world.setGravity(new Vector2(0, GameLogic.WATER_GRAVITY));
         }
     }
 
     public void draw(SpriteBatch batch) {
-        if (currentForm == previousForm ) {
+        if (currentForm == previousForm) {
             forms[currentForm].draw(batch);
         }
     }
 
     public void update(float deltaTime) {
-            if (!timeToDefineForm) {
-                forms[currentForm].update(deltaTime);
-                if(!isDead){
-                    ableToJump();
-                    if (getHit) {
-                        health -= 1;
-                        lostHealth += 1;
-                        if (health > 0) {
-                            getHit = false;
-                        } else {
-                            isDead = true;
-                            forms[currentForm].die();
-                        }
-                    }
-                    if (getHeal) {
-                        health += 1;
-                        lostHealth -= 1;
-                        getHeal = false;
-                    }
-                }
-            } else {
-                if (currentForm != previousForm) {
-                    forms[previousForm].destroy();
-                    previousForm = currentForm;
-                    forms[currentForm].change();
-                    timeToDefineForm = false;
-                }
+        if (!timeToDefineForm) {
+            forms[currentForm].update(deltaTime);
+            checkIfNotDead();
+        } else {
+            if (currentForm != previousForm) {
+                forms[previousForm].destroy();
+                previousForm = currentForm;
+                forms[currentForm].change();
+                timeToDefineForm = false;
             }
         }
+    }
+
+    private void checkIfNotDead() {
+        if (!isDead) {
+            ableToJump();
+            if (getHit) {
+                health -= 1;
+                lostHealth += 1;
+                if (health > 0) {
+                    getHit = false;
+                } else {
+                    isDead = true;
+                    forms[currentForm].die();
+                }
+            }
+            if (getHeal) {
+                health += 1;
+                lostHealth -= 1;
+                getHeal = false;
+            }
+        }
+    }
 
     public void getHitted() {
         getHit = true;
@@ -119,19 +121,23 @@ public class Player {
             getHeal = true;
         }
     }
+
     public boolean getIsAbleToChange() {
         return isAbleToChange;
     }
-    public void ableToJump(){
+
+    public void ableToJump() {
         isAbleToJump = !(getState() == Form.State.JUMPING || getState() == Form.State.FLYING || getState() == Form.State.FALLING || getState() == Form.State.SWIMMING);
     }
-    public void isAbleToChange(boolean changeState){
+
+    public void isAbleToChange(boolean changeState) {
         isAbleToChange = changeState;
     }
 
-    public boolean getIsAbleToJump(){
+    public boolean getIsAbleToJump() {
         return isAbleToJump;
     }
+
     public Form.State getState() {
         return forms[currentForm].getState();
     }
@@ -149,7 +155,7 @@ public class Player {
     }
 
     public void changeInto(int currentForm) {
-        if(isAbleToChange) {
+        if (isAbleToChange) {
             timeToDefineForm = true;
             this.currentForm = currentForm;
         }
@@ -173,7 +179,7 @@ public class Player {
         this.health = health;
     }
 
-    public float getStateTimer(){
+    public float getStateTimer() {
         return forms[currentForm].getStateTimer();
     }
 

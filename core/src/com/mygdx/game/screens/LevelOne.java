@@ -1,113 +1,109 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.scenes.Hud;
 import com.mygdx.game.sprites.enemies.Enemy;
-import com.mygdx.game.sprites.enemies.Worm;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.items.Item;
 import com.mygdx.game.sprites.objects.ObjectDef;
 import com.mygdx.game.sprites.playable.forms.Form;
-import com.mygdx.game.sprites.playable.Player;
 import com.mygdx.game.sprites.projectiles.Arrow;
 import com.mygdx.game.sprites.projectiles.Projectile;
 import com.mygdx.game.sprites.projectiles.Spit;
-import com.mygdx.game.tools.B2WorldCreator;
-import com.mygdx.game.tools.WorldContactListener;
-
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class LevelOne extends Level {
-    public LevelOne(GameLogic game){
+    public LevelOne(GameLogic game) {
         super(game, "SwampMap.tmx");
     }
-    public void spawnObject(ObjectDef objectDef){
+
+    public void spawnObject(ObjectDef objectDef) {
         objectsToSpawn.add(objectDef);
     }
-    public void handleSpawningObjects(){
-        if (!objectsToSpawn.isEmpty()){
+
+    public void handleSpawningObjects() {
+        if (!objectsToSpawn.isEmpty()) {
             ObjectDef objectDef = objectsToSpawn.poll();
-            if(objectDef.type == Heart.class){
+            if (objectDef.type == Heart.class) {
                 items.add(new Heart(this, objectDef.position.x, objectDef.position.y, objectDef.right));
-            }else if(objectDef.type == Spit.class){
+            } else if (objectDef.type == Spit.class) {
                 projectiles.add(new Spit(this, objectDef.position.x, objectDef.position.y, objectDef.right));
-            }else if(objectDef.type == Arrow.class){
+            } else if (objectDef.type == Arrow.class) {
                 projectiles.add(new Arrow(this, objectDef.position.x, objectDef.position.y, objectDef.right));
             }
         }
     }
 
-    public TextureAtlas getAtlas(){
+    public TextureAtlas getAtlas() {
         return atlas;
     }
 
-    public void update(float deltaTime){
+    public void update(float deltaTime) {
         handleInput();
         handleSpawningObjects();
-        world.step(1/60f, 6, 2);
+        world.step(1 / 60f, 6, 2);
         player.update(deltaTime);
-        for (Enemy enemy : creator.getSmallEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-        }
-        for (Enemy enemy : creator.getMillyEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-            if(enemy.getX() < player.getX() + (16 / GameLogic.PPM) || enemy.getX() > player.getX() - (16 / GameLogic.PPM)){
-                enemy.hit();
-            }
-        }
-        for (Enemy enemy : creator.getDistantEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-            if(enemy.getX() < player.getX() + (12 / GameLogic.PPM) || enemy.getX() > enemy.getX() - player.getX() - (12 / GameLogic.PPM)){
-                enemy.hit();
-            }
-        }
-        for (Item item : items){
-            item.update(deltaTime);
-        }
-        if(worm.getX() < player.getX() + (256 / GameLogic.PPM) && !worm.getB2Body().isActive()){
-            worm.update(deltaTime);
-            worm.getB2Body().setActive(true);
-            hud.setUltimateTimer(15);
-            if (Objects.equals(player.getCurrentForm().getType(), "Tyrannosaur")){
-                player.changeInto(0);
-            }
-        }
-        if(worm.getB2Body().isActive()){
-            worm.update(deltaTime);
-        }
-        for (Projectile projectile : projectiles){
-            projectile.update(deltaTime);
-        }
-        if(player.b2Body.getPosition().x > GameLogic.V_WIDTH / GameLogic.PPM - player.b2Body.getPosition().x && player.b2Body.getPosition().x <= 36.4f && player.getState() != Form.State.DEAD) {
-            gameCam.position.x = player.b2Body.getPosition().x;
-        }
+        updateObjects(deltaTime);
         gameCam.update();
         hud.update(deltaTime);
         renderer.setView(gameCam);
     }
+
+    private void updateObjects(float deltaTime) {
+        updateEnemies(deltaTime);
+        for (Item item : items) {
+            item.update(deltaTime);
+        }
+        if (worm.getX() < player.getX() + (256 / GameLogic.PPM) && !worm.getB2Body().isActive()) {
+            worm.update(deltaTime);
+            worm.getB2Body().setActive(true);
+            hud.setUltimateTimer(15);
+            if (Objects.equals(player.getCurrentForm().getType(), "Tyrannosaur")) {
+                player.changeInto(0);
+            }
+        }
+        if (worm.getB2Body().isActive()) {
+            worm.update(deltaTime);
+        }
+        for (Projectile projectile : projectiles) {
+            projectile.update(deltaTime);
+        }
+        if (player.b2Body.getPosition().x > GameLogic.V_WIDTH / GameLogic.PPM - player.b2Body.getPosition().x && player.b2Body.getPosition().x <= 36.4f && player.getState() != Form.State.DEAD) {
+            gameCam.position.x = player.b2Body.getPosition().x;
+        }
+    }
+
+    private void updateEnemies(float deltaTime) {
+        for (Enemy enemy : creator.getSmallEnemies()) {
+            enemy.update(deltaTime);
+            if (enemy.getX() < player.getX() + (256 / GameLogic.PPM)) {
+                enemy.getB2Body().setActive(true);
+            }
+        }
+        for (Enemy enemy : creator.getMillyEnemies()) {
+            enemy.update(deltaTime);
+            if (enemy.getX() < player.getX() + (256 / GameLogic.PPM)) {
+                enemy.getB2Body().setActive(true);
+            }
+            if (enemy.getX() < player.getX() + (16 / GameLogic.PPM) || enemy.getX() > player.getX() - (16 / GameLogic.PPM)) {
+                enemy.hit();
+            }
+        }
+        for (Enemy enemy : creator.getDistantEnemies()) {
+            enemy.update(deltaTime);
+            if (enemy.getX() < player.getX() + (256 / GameLogic.PPM)) {
+                enemy.getB2Body().setActive(true);
+            }
+            if (enemy.getX() < player.getX() + (12 / GameLogic.PPM) || enemy.getX() > enemy.getX() - player.getX() - (12 / GameLogic.PPM)) {
+                enemy.hit();
+            }
+        }
+    }
+
     @Override
     public void show() {
         /* not to use */
@@ -117,7 +113,7 @@ public class LevelOne extends Level {
     public void render(float delta) {
         update(delta);
 
-        Gdx.gl.glClearColor(0, 0, 0,1);
+        Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         renderer.render();
@@ -127,19 +123,19 @@ public class LevelOne extends Level {
         game.getBatch().setProjectionMatrix(gameCam.combined);
         game.getBatch().begin();
         player.draw(game.getBatch());
-        for (Enemy enemy : creator.getSmallEnemies()){
+        for (Enemy enemy : creator.getSmallEnemies()) {
             enemy.draw(game.getBatch());
         }
-        for (Enemy enemy : creator.getDistantEnemies()){
+        for (Enemy enemy : creator.getDistantEnemies()) {
             enemy.draw(game.getBatch());
         }
-        for (Enemy enemy : creator.getMillyEnemies()){
+        for (Enemy enemy : creator.getMillyEnemies()) {
             enemy.draw(game.getBatch());
         }
-        for (Item item : items){
+        for (Item item : items) {
             item.draw(game.getBatch());
         }
-        for (Projectile projectile : projectiles){
+        for (Projectile projectile : projectiles) {
             projectile.draw(game.getBatch());
         }
         worm.draw(game.getBatch());
@@ -148,11 +144,11 @@ public class LevelOne extends Level {
         game.getBatch().setProjectionMatrix(hud.stage.getCamera().combined);
         hud.stage.draw();
 
-        if(gameOver()) {
+        if (gameOver()) {
             game.setScreen(new GameOverScreen(game));
             dispose();
         }
-        if(gameWin()) {
+        if (gameWin()) {
             game.setScreen(new Victory(game));
             dispose();
         }
@@ -167,16 +163,19 @@ public class LevelOne extends Level {
         return map;
     }
 
-    public World getWorld(){
+    public World getWorld() {
         return world;
     }
+
     @Override
-    public boolean gameOver(){
+    public boolean gameOver() {
         return player.getState() == Form.State.DEAD && player.getStateTimer() > 3;
     }
-    public boolean gameWin(){
+
+    public boolean gameWin() {
         return worm.isWormDead();
     }
+
     @Override
     public void pause() {
         /* not to use */

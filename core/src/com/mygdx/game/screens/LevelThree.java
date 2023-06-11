@@ -1,37 +1,20 @@
 package com.mygdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.GameLogic;
-import com.mygdx.game.scenes.Hud;
 import com.mygdx.game.sprites.enemies.Enemy;
-import com.mygdx.game.sprites.enemies.Worm;
 import com.mygdx.game.sprites.items.Heart;
 import com.mygdx.game.sprites.items.Item;
 import com.mygdx.game.sprites.objects.ObjectDef;
-import com.mygdx.game.sprites.playable.Player;
 import com.mygdx.game.sprites.playable.forms.Form;
 import com.mygdx.game.sprites.projectiles.Arrow;
 import com.mygdx.game.sprites.projectiles.Projectile;
 import com.mygdx.game.sprites.projectiles.Spit;
-import com.mygdx.game.tools.B2WorldCreator;
-import com.mygdx.game.tools.WorldContactListener;
-
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class LevelThree extends Level {
     public LevelThree(GameLogic game){
@@ -62,30 +45,7 @@ public class LevelThree extends Level {
         handleSpawningObjects();
         world.step(1/60f, 6, 2);
         player.update(deltaTime);
-        for (Enemy enemy : creator.getSmallEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-        }
-        for (Enemy enemy : creator.getMillyEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-            if(enemy.getX() < player.getX() + (16 / GameLogic.PPM) || enemy.getX() > player.getX() - (16 / GameLogic.PPM)){
-                enemy.hit();
-            }
-        }
-        for (Enemy enemy : creator.getDistantEnemies()){
-            enemy.update(deltaTime);
-            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
-                enemy.getB2Body().setActive(true);
-            }
-            if(enemy.getX() < player.getX() + (12 / GameLogic.PPM)|| enemy.getX() > player.getX() - (12 / GameLogic.PPM)){
-                enemy.hit();
-            }
-        }
+        updateEnemies(deltaTime);
         for (Item item : items){
             item.update(deltaTime);
         }
@@ -110,6 +70,34 @@ public class LevelThree extends Level {
         hud.update(deltaTime);
         renderer.setView(gameCam);
     }
+
+    private void updateEnemies(float deltaTime) {
+        for (Enemy enemy : creator.getSmallEnemies()){
+            enemy.update(deltaTime);
+            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
+                enemy.getB2Body().setActive(true);
+            }
+        }
+        for (Enemy enemy : creator.getMillyEnemies()){
+            enemy.update(deltaTime);
+            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
+                enemy.getB2Body().setActive(true);
+            }
+            if(enemy.getX() < player.getX() + (16 / GameLogic.PPM) || enemy.getX() > player.getX() - (16 / GameLogic.PPM)){
+                enemy.hit();
+            }
+        }
+        for (Enemy enemy : creator.getDistantEnemies()){
+            enemy.update(deltaTime);
+            if(enemy.getX() < player.getX() + (256 / GameLogic.PPM)){
+                enemy.getB2Body().setActive(true);
+            }
+            if(enemy.getX() < player.getX() + (12 / GameLogic.PPM)|| enemy.getX() > player.getX() - (12 / GameLogic.PPM)){
+                enemy.hit();
+            }
+        }
+    }
+
     @Override
     public void show() {
         /* not to use */

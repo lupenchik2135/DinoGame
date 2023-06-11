@@ -1,6 +1,5 @@
 package com.mygdx.game.sprites.objects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.mygdx.game.GameLogic;
 import com.mygdx.game.screens.Level;
@@ -18,7 +17,7 @@ public class StoneWall extends InteractiveTileObject {
 
     @Override
     public void onHeadHit(Player player) {
-        if(Objects.equals(player.getCurrentForm().getType(), "Triceratops")){
+        if (Objects.equals(player.getCurrentForm().getType(), "Triceratops")) {
             setCategoryFilter(GameLogic.DESTROYED_BIT);
             getCell().setTile(null);
         }

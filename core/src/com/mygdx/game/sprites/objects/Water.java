@@ -1,7 +1,6 @@
 package com.mygdx.game.sprites.objects;
 
 import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TiledMapTile;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.GameLogic;
@@ -12,11 +11,10 @@ public class Water {
 
     protected World world;
     protected TiledMap map;
-    protected TiledMapTile tile;
     protected Rectangle bounds;
     protected Body body;
     protected Level screen;
-    protected  Fixture fixture;
+    protected Fixture fixture;
 
     public Water(Level screen, Rectangle bounds) {
         this.screen = screen;

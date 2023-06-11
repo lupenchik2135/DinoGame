@@ -121,16 +121,7 @@ public class Triceratops extends Form {
                 break;
             case HITTING:
                 region = hitAnimation.getKeyFrame(stateTimer);
-                if(runningRight){
-                    setAttackFixture(34, 9);
-                }
-                else{
-                    setAttackFixture(-34, 9);
-                }
-                if(hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 3){
-                    destroyFixtures(2);
-                    isHitting = false;
-                }
+                checkRunAndAnimation();
                 break;
             case FALLING:
             case STANDING:
@@ -149,5 +140,18 @@ public class Triceratops extends Form {
         stateTimer = currentState == previousState ? stateTimer + deltaTime : 0;
         previousState = currentState;
         return region;
+    }
+
+    private void checkRunAndAnimation() {
+        if(runningRight){
+            setAttackFixture(34, 9);
+        }
+        else{
+            setAttackFixture(-34, 9);
+        }
+        if(hitAnimation.isAnimationFinished(stateTimer) && player.b2Body.getFixtureList().size >= 3){
+            destroyFixtures(2);
+            isHitting = false;
+        }
     }
 }

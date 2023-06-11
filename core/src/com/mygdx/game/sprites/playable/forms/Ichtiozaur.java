@@ -18,33 +18,33 @@ public class Ichtiozaur extends Form {
     private Animation<TextureRegion> swimAnimation;
 
 
-    public Ichtiozaur(Level screen, Player player){
+    public Ichtiozaur(Level screen, Player player) {
         super(screen, "Ichtiosaur", player);
         this.type = "Ichtiozaur";
-        for(int i = 0; i < 5; i++){
-            if(i <= 2) frames.add(new TextureRegion(getTexture(),77 + i * (57+20), 84, 57, 30));
-            else if(i <= 3) frames.add(new TextureRegion(getTexture(), 310 + (i - 2) * (53+20), 84, 53, 30));
-            else frames.add(new TextureRegion(getTexture(),455, 84, 57, 30));
+        for (int i = 0; i < 5; i++) {
+            if (i <= 2) frames.add(new TextureRegion(getTexture(), 77 + i * (57 + 20), 84, 57, 30));
+            else if (i <= 3) frames.add(new TextureRegion(getTexture(), 310 + (i - 2) * (53 + 20), 84, 53, 30));
+            else frames.add(new TextureRegion(getTexture(), 455, 84, 57, 30));
         }
         runAnimation = new Animation<>(0.1f, frames);
         frames.clear();
 
 
-        frames.add(new TextureRegion(getTexture(),2005, 82, 47, 32));
-        frames.add(new TextureRegion(getTexture(),2005 + 67, 88, 58, 25));
+        frames.add(new TextureRegion(getTexture(), 2005, 82, 47, 32));
+        frames.add(new TextureRegion(getTexture(), 2005 + 67, 88, 58, 25));
         hitAnimation = new Animation<>(0.2f, frames);
 
         frames.clear();
 
 
-        frames.add(new TextureRegion(getTexture(),532 + 80, 85, 60, 28));
+        frames.add(new TextureRegion(getTexture(), 532 + 80, 85, 60, 28));
         frames.add(new TextureRegion(getTexture(), 532 + 80 + 80, 85, 60, 27));
         frames.add(new TextureRegion(getTexture(), 532 + 82 + 80 + 80, 79, 61, 33));
 
         swimAnimation = new Animation<>(0.25f, frames);
         frames.clear();
 
-        frames.add(new TextureRegion(getTexture(),2150, 87, 44, 25));
+        frames.add(new TextureRegion(getTexture(), 2150, 87, 44, 25));
         frames.add(new TextureRegion(getTexture(), 2150 + 64, 94, 33, 18));
         frames.add(new TextureRegion(getTexture(), 2150 + 64 + 53, 95, 33, 17));
         frames.add(new TextureRegion(getTexture(), 2150 + 64 + 53 + 53, 96, 33, 16));
@@ -58,7 +58,8 @@ public class Ichtiozaur extends Form {
         currentFormHealth = 4;
         isSwimming = false;
     }
-    public void define(){
+
+    public void define() {
         walking = manager.get("audio/Sounds/triceStep.mp3", Sound.class);
         walking.play(0.5f, 10, 10);
         walking.loop();
@@ -77,40 +78,39 @@ public class Ichtiozaur extends Form {
                 GameLogic.WATER_BIT |
                 GameLogic.ITEM_BIT;
         fdef.shape = shape;
-        if (player.b2Body != null){
+        if (player.b2Body != null) {
             this.player.b2Body.createFixture(fdef).setUserData(player);
         }
         destroyed = false;
     }
-    public State getState(){
-        if(isDead){
+
+    public State getState() {
+        if (isDead) {
             return State.DEAD;
-        }
-        else if(runChangeAnimation){
+        } else if (runChangeAnimation) {
             return State.CHANGING;
-        }else if(isSwimming){
+        } else if (isSwimming) {
             return State.SWIMMING;
-        }
-        else if (player.b2Body.getLinearVelocity().y < 0)
+        } else if (player.b2Body.getLinearVelocity().y < 0)
             return State.FALLING;
         else if (player.b2Body.getLinearVelocity().x != 0)
             return State.RUNNING;
-        else if (Gdx.input.justTouched()){
+        else if (Gdx.input.justTouched()) {
             return State.HITTING;
-        }
-        else
+        } else
             return State.STANDING;
     }
-    public TextureRegion getFrame(float deltaTime){
+
+    public TextureRegion getFrame(float deltaTime) {
         currentState = getState();
         TextureRegion region;
-        switch (currentState){
+        switch (currentState) {
             case DEAD:
                 region = deadAnimation.getKeyFrame(stateTimer);
                 break;
             case CHANGING:
                 region = changeForm;
-                if (stateTimer > 1){
+                if (stateTimer > 1) {
                     runChangeAnimation = false;
                     coolDown = 3;
                 }
@@ -120,52 +120,24 @@ public class Ichtiozaur extends Form {
                 break;
             case HITTING:
                 region = hitAnimation.getKeyFrame(stateTimer);
-                if(runningRight){
-                    screen.spawnObject(new ObjectDef(new Vector2(player.b2Body.getPosition().x + 50 / GameLogic.PPM, player.b2Body.getPosition().y),
-                            Spit.class, runningRight));
-                }
-                else {
-                    screen.spawnObject(new ObjectDef(new Vector2(player.b2Body.getPosition().x - 50 / GameLogic.PPM, player.b2Body.getPosition().y),
-                            Spit.class, runningRight));
-                }
+                checkRun();
                 break;
             case SWIMMING:
                 player.b2Body.resetMassData();
                 velocityX = 10 / GameLogic.PPM;
                 jumpHeight = 10 / GameLogic.PPM;
-                if (Gdx.input.isKeyPressed(Input.Keys.W) && player.b2Body.getLinearVelocity().y <= player.getCurrentForm().getJumpHeight()) {
-                    player.b2Body.setLinearVelocity(0, 0.3f);
-                    region = swimAnimation.getKeyFrame(stateTimer, true);
-                }
-                else if (Gdx.input.isKeyPressed(Input.Keys.S) && player.b2Body.getLinearVelocity().y >= -player.getCurrentForm().getJumpHeight()) {
-                    player.b2Body.applyLinearImpulse(new Vector2(0, -0.3f), player.b2Body.getWorldCenter(), true);
-                    region = swimAnimation.getKeyFrame(stateTimer, true);
-                }
-                else if (Gdx.input.isKeyPressed(Input.Keys.D) && player.b2Body.getLinearVelocity().x <= player.getCurrentForm().getVelocityX()) {
-                player.b2Body.setLinearVelocity(0.3f, 0);
-                region = swimAnimation.getKeyFrame(stateTimer, true);
-                    break;
-                }
-                else if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -player.getCurrentForm().getVelocityX())
-                {
-                    player.b2Body.applyLinearImpulse(new Vector2(-0.3f, 0), player.b2Body.getWorldCenter(), true);
-                    region = swimAnimation.getKeyFrame(stateTimer, true);
-                    break;
-                }
-                else region = swimAnimation.getKeyFrame(stateTimer, true);
-                    break;
-
+                region = checkInput();
+                break;
             case FALLING:
             case STANDING:
             default:
                 region = standTexture;
                 break;
         }
-        if ((player.b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()){
+        if ((player.b2Body.getLinearVelocity().x < 0 || !runningRight) && !region.isFlipX()) {
             region.flip(true, false);
             runningRight = false;
-        }
-        else if (((player.b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())){
+        } else if (((player.b2Body.getLinearVelocity().x > 0 || runningRight) && region.isFlipX())) {
             region.flip(true, false);
             runningRight = true;
         }
@@ -174,13 +146,41 @@ public class Ichtiozaur extends Form {
         return region;
     }
 
+    private TextureRegion checkInput() {
+        TextureRegion region;
+        if (Gdx.input.isKeyPressed(Input.Keys.W) && player.b2Body.getLinearVelocity().y <= player.getCurrentForm().getJumpHeight()) {
+            player.b2Body.setLinearVelocity(0, 0.3f);
+            region = swimAnimation.getKeyFrame(stateTimer, true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.S) && player.b2Body.getLinearVelocity().y >= -player.getCurrentForm().getJumpHeight()) {
+            player.b2Body.applyLinearImpulse(new Vector2(0, -0.3f), player.b2Body.getWorldCenter(), true);
+            region = swimAnimation.getKeyFrame(stateTimer, true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D) && player.b2Body.getLinearVelocity().x <= player.getCurrentForm().getVelocityX()) {
+            player.b2Body.setLinearVelocity(0.3f, 0);
+            region = swimAnimation.getKeyFrame(stateTimer, true);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -player.getCurrentForm().getVelocityX()) {
+            player.b2Body.applyLinearImpulse(new Vector2(-0.3f, 0), player.b2Body.getWorldCenter(), true);
+            region = swimAnimation.getKeyFrame(stateTimer, true);
+        } else region = swimAnimation.getKeyFrame(stateTimer, true);
+        return region;
+    }
+
+    private void checkRun() {
+        if (runningRight) {
+            screen.spawnObject(new ObjectDef(new Vector2(player.b2Body.getPosition().x + 50 / GameLogic.PPM, player.b2Body.getPosition().y),
+                    Spit.class, runningRight));
+        } else {
+            screen.spawnObject(new ObjectDef(new Vector2(player.b2Body.getPosition().x - 50 / GameLogic.PPM, player.b2Body.getPosition().y),
+                    Spit.class, runningRight));
+        }
+    }
+
     public boolean isSwimming() {
         return isSwimming;
     }
 
     public void setSwimming(boolean swimming) {
         isSwimming = swimming;
-        if(!isSwimming){
+        if (!isSwimming) {
             velocityX = 20 / GameLogic.PPM;
             jumpHeight = 14 / GameLogic.PPM;
             world.setGravity(new Vector2(0, GameLogic.GRAVITY));
