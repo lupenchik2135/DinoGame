@@ -37,7 +37,6 @@ public class WorldContactListener implements ContactListener {
                     ((Player)fixB.getUserData()).isAbleToChange(false);
                 break;
                 //player stands on enemy
-            case GameLogic.SMALL_ENEMY_HEAD_BIT | GameLogic.TYRANNOSAUR_BIT:
             case GameLogic.SMALL_ENEMY_HEAD_BIT | GameLogic.PLAYER_BIT:
                 if(fixA.getFilterData().categoryBits == GameLogic.SMALL_ENEMY_HEAD_BIT)
                     ((SmallEnemy)fixA.getUserData()).hitOnHead();

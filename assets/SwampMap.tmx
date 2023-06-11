@@ -5,12 +5,12 @@
  <tileset firstgid="961" source="Water.tsx"/>
  <layer id="2" name="Backround" width="240" height="13">
   <data encoding="base64" compression="zlib">
-   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
+   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
   </data>
  </layer>
  <layer id="3" name="Graphics" width="240" height="13">
   <data encoding="base64" compression="zlib">
-   eJzt2FkKgzAUheFQW9xA6bCH7qFr7zy+dEc9PhSCaMjVaCr8HxzQRPISD6Z1DgAAAAAAAKntRw4AAADw7/zz66Fw7qiclLNyUa5FvnHO2ECzpm7c1Jm78lCeykt5F+Hxtrm2WNbnt7LdchY3hmkKdcLaxVBSrMV/Xnb0N41P4nX67EG1RkwXft/THLF+f+nv8KpXTtvg5srC+Kx/XZ/rez+Gqfa3y/k5Z3+nktLbj9KYGNY1Y7JS1spG2Rqf9a/rc33vd6QxXfo75HjuzqXMFyUw8OA=
+   eJzt2FsKgzAUhOGgLW6g1HYP3UPX3vv1pTvqSCmIqORoNAT+DwY1kbzYQVPnAAAAAAAAENp+5gAAAAApKLPf8ZA7d1ROylm5KNc83jiAdm37z5s6c1ceylN5Ke+8f7xrriuW9dkr260yvzGkqa8T1i72JcRa/OdlR3/D+AReZ8wzqNbw6cL/fRoj1vcv/Z1e9ZOrtjELZWm8t37enBt7PYdU+zvk+zlmf1NJUXsehTE+rGv6ZK2UykbZGu+tnzfnxl7vSGuG9HfK8didC5kvOIfvAQ==
   </data>
  </layer>
  <objectgroup draworder="index" id="4" name="Ground">
@@ -25,10 +25,8 @@
   <object id="98" x="2304" y="160" width="144" height="17.3333"/>
   <object id="99" x="2336" y="144" width="112" height="16"/>
   <object id="100" x="2368" y="128" width="80" height="16"/>
-  <object id="101" x="2400" y="112" width="48" height="16"/>
   <object id="104" x="3024" y="144" width="144" height="32"/>
   <object id="105" x="3024" y="128" width="112" height="16"/>
-  <object id="106" x="3024" y="112" width="80" height="16"/>
   <object id="122" x="2304" y="176" width="144" height="16"/>
  </objectgroup>
  <objectgroup id="5" name="StoneWall">
@@ -55,7 +53,6 @@
   <object id="62" x="2080" y="176" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="11" name="MillyWarriors">
-  <object id="80" x="2608" y="47.3333" width="16" height="16"/>
   <object id="81" x="2752" y="47.3333" width="16" height="16"/>
   <object id="119" x="496" y="160" width="16" height="16"/>
  </objectgroup>

@@ -140,8 +140,21 @@ public class Ichtiozaur extends Form {
                 else if (Gdx.input.isKeyPressed(Input.Keys.S) && player.b2Body.getLinearVelocity().y >= -player.getCurrentForm().getJumpHeight()) {
                     player.b2Body.applyLinearImpulse(new Vector2(0, -0.3f), player.b2Body.getWorldCenter(), true);
                     region = swimAnimation.getKeyFrame(stateTimer, true);
-                } else region = swimAnimation.getKeyFrame(stateTimer, true);
-                break;
+                }
+                else if (Gdx.input.isKeyPressed(Input.Keys.D) && player.b2Body.getLinearVelocity().x <= player.getCurrentForm().getVelocityX()) {
+                player.b2Body.setLinearVelocity(0.3f, 0);
+                region = swimAnimation.getKeyFrame(stateTimer, true);
+                    break;
+                }
+                else if (Gdx.input.isKeyPressed(Input.Keys.A) && player.b2Body.getLinearVelocity().x >= -player.getCurrentForm().getVelocityX())
+                {
+                    player.b2Body.applyLinearImpulse(new Vector2(-0.3f, 0), player.b2Body.getWorldCenter(), true);
+                    region = swimAnimation.getKeyFrame(stateTimer, true);
+                    break;
+                }
+                else region = swimAnimation.getKeyFrame(stateTimer, true);
+                    break;
+
             case FALLING:
             case STANDING:
             default:

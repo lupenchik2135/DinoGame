@@ -92,7 +92,7 @@ public class LevelThree extends Level {
         if(worm.getX() < player.getX() + (256 / GameLogic.PPM) && !worm.getB2Body().isActive()){
             worm.update(deltaTime);
             worm.getB2Body().setActive(true);
-            hud.setUltimateTimer(30);
+            hud.setUltimateTimer(15);
             if (Objects.equals(player.getCurrentForm().getType(), "Tyrannosaur")){
                 player.changeInto(0);
             }

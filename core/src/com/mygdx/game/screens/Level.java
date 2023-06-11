@@ -87,7 +87,7 @@ public abstract class Level implements Screen {
 
 
     public void handleInput(){
-        if(!player.getCurrentForm().isChanging() && player.getState() != Form.State.DEAD){
+        if(!player.getCurrentForm().isChanging() && player.getState() != Form.State.DEAD && player.getState() != Form.State.SWIMMING){
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && player.getIsAbleToJump()) {
                 player.b2Body.applyLinearImpulse(new Vector2(0, player.getCurrentForm().getJumpHeight()), player.b2Body.getWorldCenter(), true);
             }
